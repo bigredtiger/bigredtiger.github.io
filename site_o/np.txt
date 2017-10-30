@@ -1,0 +1,320 @@
+/* NavPanel creates the left navigation
+** Dependencies: navPanel.css, ConfirmLayout.jsp, commonNavFunctions.js, 
+** tsweb.css, util.js, global.js, messageBundle.jsp
+*/
+$(function() {
+	//Usage: new NavPanel(pageId, options);
+	//pageId = string representing current page
+	//options = configuration object with target selector id and  servlet map
+	new NavPanel(current_page_id);
+});
+
+//Generic superclass constructor
+function NavLayout(pageId,options) {
+	this.pageId = pageId || null;  
+	this.settings = {
+		targetId: null,
+		page: {}
+	};
+	if (options) {
+		$.extend( this.settings, options );
+	}	
+}
+
+//Generic superclass constructor methods
+NavLayout.prototype = function() {
+
+	//id of parent node layout
+	var parentId = 'navParent';
+	
+	//Hides a section
+	function hideSection(obj) {
+		$(obj).hide().prev().addClass('collapsed');
+	}
+	
+	//Shows a section
+	function showSection(obj) {
+		$(obj).show().prev().removeClass('collapsed');
+	}
+	
+	//Make call to get json
+	function getData() {
+		return $.parseJSON($.ajax({
+			type: 'get',
+			url: this.settings.page[this.pageId],
+			dataType:'json',
+			async: false
+		}).responseText);
+	}
+	
+	//Generates a generic Id
+	//Takes the label and converts to a camel-case id
+	function getNewId(val) {
+		val = val.replace(/\s/g,'').replace(val.charAt(0),val.charAt(0).toLowerCase());
+		return val+'Section';
+	}
+	
+	//Creates a query string
+	function makeQueryStr(o) {
+		var str = [], intVar=0;
+		for (var i in o) {		
+			str[intVar]=i +'='+o[i];	
+			intVar++;
+		}
+		return '?'+str.join('&');
+	}		
+	
+	//Creates tag attributes from props obj
+	function makePropsAttr(o) {
+		var str = '';
+		for (var i in o) {		
+			str += (i + '="' + o[i] + '" ');		
+		}
+		return str;
+	}
+	
+	//Creates href attribute
+	function makeHrefAttr(o, bool, pref) {
+		var str = '';
+		if (pref == undefined) {
+			pref = 'href';
+		}
+		if (o && o != null) {
+			var someStr = stringify(o.params);
+			var p = '', q = '';
+			if (someStr != '{}' && someStr != 'null') {
+				p = pref + 'Params="' + encodeURIComponent(someStr) + '" ';
+				if (bool) {
+					q = makeQueryStr(o.params);
+				}
+			}
+			str += (pref + '="'+o.url+q+'" '+p);
+		}	
+		return str;
+	}
+	
+	//Creates tag attributes from actions obj
+	function makeActionsAttr(o) {
+		var str = '';
+		if (o && o != null) {
+			var cnt = o.length;
+			while(cnt) {
+				var obj = o[cnt - 1];
+				str += makeHrefAttr(obj.href, false, obj.type);
+				cnt--;
+			}	
+		}
+		return str;
+	}
+	
+	//Main call to create tag attributes
+	function makeAttr(o) {
+		var str = '';
+		str += 'isModal=' + (o.isModal && o.isModal != null ? o.isModal : null) + ' ';
+		str += makePropsAttr(o.props);
+		str += makeHrefAttr(o.href,true);
+		str += makeActionsAttr(o.actions);
+		return str;
+	}	
+	
+	//html for ul section
+	function startList(id,counter) {
+		return '<ul id="'+id+'" class="child'+counter+'">';
+	}
+	
+	//html for list items
+	function startNode(counter,val) {
+		var nodeItem = '<a '+makeAttr(val)+'class="lev'+counter+'Link">'+val.label+'</a>';
+		if (val.href == null) {
+			nodeItem = '<span '+makeAttr(val)+'class="lev'+counter+'Text">'+val.label+'</span>';
+		}
+		return '<li class="lev'+counter+'">'+ nodeItem;
+	}
+	
+	//Parses json and creates an unordered html list
+	function builder(o,counter,par) {
+		if (counter == undefined) {
+			counter = 0;
+			par = startList(parentId,counter);
+			counter++;
+		} 
+		for (var i in o) {	
+			if ($.isArray(o) && o[i] !=null && o[i].label != undefined) {
+				par += startNode(counter,o[i]);
+			}		
+			if (typeof(o[i])=="object" && i != 'props' && i != 'href' && i != 'actions' && o[i] !=null) {
+				if (!$.isArray(o)) {
+					var newId = getNewId(o['label']);
+					par += startList(newId,counter);
+					counter++;
+				} 
+                par = builder(o[i],counter,par);
+				if (!$.isArray(o)) {
+					par += '</ul>';
+				} else {
+					par += '</li>';
+				}	
+			}
+		}
+		if (counter == 1) {
+			par += '</ul>';
+		}
+		return par;
+	}
+	
+	//Sets html ul list based on target id
+	function setLayout(json) {
+		if (json != null) {
+			$('#' + this.settings.targetId).append(builder(json));
+		}
+	}
+	
+	//Sets presentation layer of navigation, subclass must override
+	function setStyle() {
+		var str = arguments.callee.toString();
+		throw Error("Please override "+str.substring(str.indexOf(' '),str.indexOf('('))+" method in subclass");
+	}
+	
+	//Sets events of navigation, subclass must override
+	function setEvent() {
+		var str = arguments.callee.toString();
+		throw Error("Please override "+str.substring(str.indexOf(' '),str.indexOf('('))+" method in subclass");
+	}
+	
+	//Public methods
+	return {
+		constructor: NavLayout,
+		hideSection: hideSection,
+		showSection: showSection,
+		getData: getData,
+		setLayout: setLayout,
+		setStyle: setStyle,
+		setEvent: setEvent
+	};
+}();
+
+//Subclass of NavLayout - Non-generic
+function NavPanel(pageId, options) {
+	this.pageId = pageId || 'grid';  
+	this.settings = {
+		targetId: 'nav2',
+		page: {
+			edit_retrieve_profile: 'GetProfilePageMenu.do',
+			edit_view_profile: 'GetProfilePageMenu.do',
+			edit_export_profile: 'GetProfilePageMenu.do',
+			grid: 'GetLandingPageMenu.do'
+		}
+	};
+	if (options) {
+		$.extend( this.settings, options );
+	}
+	this.setLayout(this.getData());
+	this.setStyle();
+	this.setEvent();
+}
+
+//Inherits properties from NavLayout
+extend(NavPanel,NavLayout);
+
+//NavPanel methods
+//Sets presentation layer of Tradesuite Specific left navigation
+//Add any presentation layer items here
+NavPanel.prototype.setStyle = function() {
+
+	//Using current_page_id parameter, converts this to the generic id format so we can hide/show (con't) 
+	//profiles menu seamlessly
+	function getSectionId(id) {
+		id = id.split('_');
+		return '#'+id[1]+id[2].replace(id[2].charAt(0),id[2].charAt(0).toUpperCase())+'sSection';
+	}
+	$('[delete_image]').append('<a href="#" class="remove" title="Delete">Delete</a>');
+	$('#confirmsSection a, #confirmsSection span').append(' (<span class="bucket"></span>)');
+	$('#confirmsSection a:eq(0)').append('<span id="level4_info"></span>');
+	switch(this.pageId) {
+		case 'grid':
+			this.hideSection('#profilesSection,#linksSection');
+			$('[isModal=true]').addClass('modalStart');
+			break;
+		default:
+			this.hideSection('.child1');
+			this.showSection(getSectionId(this.pageId));
+	}	
+}
+
+//Sets event layer of Tradesuite Specific left navigation
+NavPanel.prototype.setEvent = function() {
+	$('#retrieveProfilesSection').data('count',$('#retrieveProfilesSection li').length);
+	$('#viewProfilesSection').data('count',$('#viewProfilesSection li').length);
+	$('#exportProfilesSection').data('count',$('#exportProfilesSection li').length);
+	$('.lev1Link').click(function() {
+		$('.lev1Link').each(function() {
+			$(this).next().slideUp('fast');
+			$(this).addClass('collapsed');		
+		});
+		$(this).next().slideDown('slow');
+		$(this).removeClass('collapsed');	
+		return false;
+	}); 
+	$('.remove').click(function() {
+		var that = this;
+		var pName = $(that).parents('a').text();
+		pName = pName.substring(0,pName.indexOf('Delete'));
+		if (confirm(profiles_delete_confrimDelete.replace('profile name',pName))) {
+			$.ajax({
+				type: 'post',
+				url: $(this).parents('a').attr('delete_image'),
+				//data: $.parseJSON(unescape($(this).parents('a').attr('delete_imageParams'))),
+				data: $.parseJSON(decodeURIComponent($(this).parents('a').attr('delete_imageParams'))),
+				success: function() {
+					$(that).parents('ul').data('count',$(that).parents('ul').data('count')-1);
+					$(that).hide().closest('li').css({'position':'absolute','z-index':5000}).slideUp('slow').empty();
+				}
+			});
+		}
+		return false;
+	});			
+	switch(this.pageId) {
+		case 'grid':
+			this.setGridEvent();
+			break;
+		default:
+			this.setProfilesEvent();
+	}	
+}	
+
+//Profile menu specific events
+NavPanel.prototype.setProfilesEvent = function() {
+	$('.remove').click(function() {
+		var pName = $(this).parents('a').text();
+		pName = pName.substring(0,pName.indexOf('Delete'));	
+		var url = $(this).parents('a').attr('href');
+		if (this.pageId != 'grid' && pName == $('#profileName').val()) {
+			location.href = url.substring(0,url.indexOf('?'));
+		}
+	});
+}
+
+//Grid menu specific events
+NavPanel.prototype.setGridEvent = function() {
+	$('#confirmsSection .lev2Link:eq(0)').click(function() {
+		resetAllFilter();
+		current_page_id = 'grid';
+		return false;
+	});
+	$('#confirmsSection .lev3Link').bind('click',function() {
+		if (!$(this).data('disabled')) {
+			$('.lev3Link').removeClass('emphasize');
+			$(this).addClass('emphasize');
+			current_page_id = 'grid';
+			showConfirmTypeInList($('.lev3Link').index(this)+1);
+			
+		}
+		return false;
+	});
+	if ($('#retrieveProfilesSection .lev3Link,#viewProfilesSection .lev3Link').attr('isModal') != 'true') {
+		$('#retrieveProfilesSection .lev3Link,#viewProfilesSection .lev3Link').bind('click',function() {
+			submitToURL($(this).attr('href'),$.parseJSON(decodeURIComponent($(this).attr('hrefParams'))));
+			return false;
+		});
+	}
+}

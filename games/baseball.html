@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Baseball</title>
+		<style>
+			body {
+				background-color: #000;
+				color: #ddd;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 93vh;
+				margin: 0;
+			}
+			#container {
+				display: flex;
+				flex: 0;
+				flex-flow: row wrap;
+				background-color: #390;
+				border-radius: 6px;
+				padding: 20px;
+				justify-content: center;
+			}
+			.board {
+				background-color: darkgreen;
+				display: flex;
+				flex: 0 0 100%;
+				padding: 6px 0 0 6px;
+				font-size: 1.2em;
+				box-sizing: border-box;
+			}
+			#current {
+				justify-content: space-between;
+				flex: 0 0 100%;
+				display: flex;
+			}
+			#homeTeam, #visitorTeam, .head, .currentLabel {
+				color: lightgreen;
+				margin: 0 6px 6px 0;
+				padding: 3px 0;
+			}
+			.head {
+				text-align: center;
+			}
+			.content {
+				background-color: #000;
+				margin: 0 6px 6px 0;
+				padding: 3px;
+				text-align: right;
+			}
+			#innings {
+				display: inline-flex;
+			}
+			#totals {
+				margin-left: 6px;
+				display: inline-flex;
+			}
+			div.total:first-child {
+				margin-left: 6px;
+			}
+			#field {
+				background-color: brown;
+				display: inline-flex;
+				flex-flow: row wrap;
+				padding: 10px 0 0 10px;
+				flex: 0 0 60px;
+				transform: rotate(45deg);
+				width: 60px;
+				margin: 20px 0;
+			}
+			.base {
+				background-color: #fff;
+				width: 20px;
+				height: 20px;
+				margin: 0 10px 10px 0;
+			}
+			.base.home {
+				background-color: #aaa;
+			}
+			.current {
+				background-color: orange;
+				color: #000;
+			}
+			.col {
+				display: flex;
+			}
+			#players {
+				flex: 0 0 100%;
+				display: flex;
+				margin-top: 10px;
+			}
+			.grid {
+				border-collapse: collapse;
+			}
+			.cell {
+				padding: 0 10px 3px 0;
+			}
+			.playerLabel {
+				color: #630;
+			}
+			.statusValue {
+				color: #fff;
+			}
+			.statusLabel {
+				color: #630;
+				font-weight: bold;
+			}
+			.winner {
+				background-color: #9ff;
+				color: #666;
+			}
+		</style>
+	</head>
+	<body>
+		<section id="container">
+			<section id="scoreboard" class="board"></section>
+			<section id="field">
+				<div id="base-1" class="base"></div>
+				<div id="base-0" class="base"></div>
+				<div id="base-2" class="base"></div>
+				<div id="base-3" class="base home"></div>
+			</section>
+			<section id="current" class="board"></section>
+			<section id="players"></section>
+		</section>
+		<script src="teams.js"></script>
+		<script>
+			let home = nyy, visitor = sf, teamBool = true;
+			
+			class Baseball {
+				constructor(home, visitor, multiplier = 100) {
+					this.sb = [];
+					this.home = {
+						totals: [0, 0, 0],
+						batterIndex: 0
+					};
+					this.home = Object.assign({}, this.home, home);
+					this.visitor = {
+						totals: [0, 0, 0],
+						batterIndex: -1
+					};
+					this.visitor = Object.assign({}, this.visitor, visitor);
+					this.balls = 0;
+					this.strikes = 0;
+					this.outs = 0;
+					this.team = 'home';
+					this.inning = 0;
+					this.totalCol = 0;
+					this.prevClass = '';
+					this.prevInning = 0;
+					this.prevTeam = 'visitor';
+					this.status = 'Game started...';
+					this.base = [0, 0, 0];
+					this.animList = [];
+					this.multiplier = multiplier;
+					this.init();
+				}
+				setScore(score) {
+					if (this.sb[this.inning]) {
+						this.sb[this.inning][this.team] = score;
+					} else {
+						this.sb[this.inning] = {};
+						this.sb[this.inning][this.team] = score;
+					}
+				}
+				setRuns(runs) {
+					this.totalCol = 0;
+					this[this.team].totals[0] = runs;
+				}
+				setHits(hits) {
+					this.totalCol = 1;
+					this[this.team].totals[1] = hits;
+				}
+				baseHit() {
+					this.setHits(1 + this[this.team].totals[1]);
+					this.renderTotal();				
+				}
+				score() {
+					this.setScore(1 + (this.sb[this.inning] && this.sb[this.inning][this.team] ? this.sb[this.inning][this.team] : 0));
+					this.setRuns(1 + this[this.team].totals[0]);
+					this.renderScoreboard();
+					this.renderTotal();					
+				}
+				pitch() {
+					return Math.floor(Math.random() * 6);
+				}
+				bat(goodPitch) {
+					const result = Math.round(Math.random() * 1000)/1000;
+					
+					if (result < this[this.team].starters[this[this.team].batterIndex].ba && !goodPitch) {
+			
+						return goodPitch;
+					} else if (!goodPitch) {
+						return 1;
+					} else {
+						return goodPitch;
+					}
+				}
+				isOver() {
+					return (this.inning > 8 && this.home.totals[0] !== this.visitor.totals[0]) || (this.inning >= 8 && this.home.totals[0] < this.visitor.totals[0] && this.team === 'visitor');
+				}
+				nextBatter() {
+					if (this[this.team].batterIndex < this[this.team].starters.length - 1) {
+						this[this.team].batterIndex++;
+					} else {
+						this[this.team].batterIndex = 0;
+					}
+					this.renderPlayers(1);
+				}
+				nextPitcher() {
+					this.renderPlayers(0);
+				}
+				goHome() {
+					if (!this.animList.length) {
+						this.renderHome();
+					} else {
+						this.animList.push(1);
+					}
+					this.score();				
+				}
+				calc(walk) {
+					const result = Math.round(Math.random() * 1000)/1000;
+					const hr = this[this.team].starters[this[this.team].batterIndex].hr / 1000;
+
+					this.baseHit();
+					
+					if (result <  hr && !walk) {
+						for (let i = 0; i < 3; i++) {
+							if (this.base[i]) {
+								this.base[i] = 0;
+								this.renderField();
+								this.goHome();
+							}
+						}
+						this.status = 'HOME RUN!!!'; 
+						this.renderPlayers(2);				
+						this.goHome();
+					} else {
+						if (walk) {
+							this.status = 'Walk.';						
+						} else {
+							this.status = 'Base hit!'; 
+						}
+						this.renderPlayers();
+						
+						let hit = 0;
+						
+						if (!walk) {
+							hit = Math.floor(Math.random() * 3);
+						}
+						
+						for (let i = 0; i < 3; i++) {
+							if (this.base[i]) {
+								this.base[i] = 0;
+								if ((hit + 1 + i) < 3) {
+									this.base[hit + 1 + i] = 1;
+									this.renderField();
+								} else {
+									this.renderField();
+									this.goHome();
+								}
+							}
+						}
+						this.base[hit] = 1;
+						this.renderField();
+					}
+				}
+				start() {
+					if (!this.isOver()) {						
+						this.renderHighlight();
+						const goodPitch = this.bat(this.pitch());
+						if (!goodPitch) {
+							this.strikes = 0;
+							this.balls = 0;							
+							this.calc();
+							this.renderCurrent(0, 1);
+							this.nextBatter();					
+						} else if (goodPitch === 1) {
+							this.balls++;
+							this.renderCurrent(1);
+							if (this.balls > 3) {
+								this.strikes = 0;
+								setTimeout(() => {									
+									this.balls = 0;
+									this.calc(goodPitch);
+									this.renderCurrent(0, 1);
+									this.nextBatter();
+								}, 3 * this.multiplier);
+							}
+						} else {
+							this.strikes++;
+							this.renderCurrent(0);
+						}
+						if (this.strikes > 2) {
+							this.strikes = 0;
+							this.balls = 0;
+							this.outs++;
+							this.renderCurrent(2);
+							setTimeout(() => {
+								this.renderCurrent(0, 1);
+								if (this.outs < 3) {
+									this.nextBatter();
+								}
+							}, 2 * this.multiplier);							
+						}
+						if (this.outs > 2) {
+							if (this.team === 'home') {
+								this.team = 'visitor';
+							} else {
+								this.team = 'home';
+								this.inning++;
+							}
+							setTimeout(() => {
+								this.outs = 0;
+								this.renderCurrent(2);
+								for (let i = this.base.length; i--;) {
+									this.base[i] = 0;
+								}
+								this.renderField();
+							}, 3 * this.multiplier);
+							setTimeout(() => {
+								this.nextPitcher();
+								this.nextBatter();
+								this.start();
+							}, 6 * this.multiplier);							
+						} else {
+							setTimeout(() => {
+								this.status = 'Game in progress...'; 
+								this.renderPlayers();
+								this.start();
+							}, 3 * this.multiplier);						
+						}
+					} else {
+						this.renderHighlightWinner();
+					}
+				}
+				renderHome() {
+					document.getElementById(`base-3`).style.backgroundColor = '#9ff';
+					setTimeout(() => {
+						document.getElementById(`base-3`).style.backgroundColor = '';
+						if (this.animList.length) {
+							this.animList.pop();
+							this.renderHome();
+						}
+					}, 5 * this.multiplier);				
+				}
+				renderField() {
+					const max = this.base.length;
+					
+					for (let i = 0; i < max; i++) {
+						if (this.base[i]) {
+							document.getElementById(`base-${i}`).style.backgroundColor = 'orange';
+						} else {
+							document.getElementById(`base-${i}`).style.backgroundColor = '';
+						}
+					}
+				}
+				renderHighlightWinner() {
+					const $container = document.getElementsByClassName('total')[0];
+					let winner = 'visitor';
+					
+					if (this.home.totals[0] > this.visitor.totals[0]) {
+						winner = 'home';
+					}
+					
+					this.status = `${this[winner].longName} wins!`; 
+					this.renderPlayers(2);				
+					
+					$container.getElementsByClassName(`content ${winner}`)[0].className = `${$container.getElementsByClassName(`content ${winner}`)[0].className} winner`;
+			
+				}
+				renderHighlight() {
+					if (document.getElementsByClassName('inning')[this.inning]) {
+						const $container = document.getElementsByClassName('inning')[this.inning];
+						if (this.prevClass) {
+							const $container = document.getElementsByClassName('inning')[this.prevInning];
+							
+							$container.getElementsByClassName(`content ${this.prevTeam}`)[0].className = this.prevClass;
+						}
+						this.prevClass = $container.getElementsByClassName(`content ${this.team}`)[0].className;
+						this.prevInning = this.inning;
+						this.prevTeam = this.team;
+						$container.getElementsByClassName(`content ${this.team}`)[0].className = `${this.prevClass} current`;
+					} else {
+						const $container = document.getElementById('innings');
+						const tpl = `<div class="inning">
+							<div class="head">${this.inning + 1}</div>
+							<div class="content home">0</div>
+							<div class="content visitor">0</div>
+						</div>`;	
+
+						$container.insertAdjacentHTML('beforeend', tpl);
+						this.renderHighlight();
+					}
+				}
+				renderScoreboard() {
+					if (this.sb.length) {
+						if (document.getElementsByClassName('inning')[this.sb.length - 1]) {
+							const $container = document.getElementsByClassName('inning')[this.sb.length - 1];
+							const obj = this.sb[this.sb.length - 1];
+							
+							if (obj[this.team]) {
+								$container.getElementsByClassName(`content ${this.team}`)[0].innerHTML = obj[this.team];
+							}
+						} else {
+							const $container = document.getElementById('innings');
+							const obj = this.sb[this.sb.length - 1];
+							const tpl = `<div class="inning">
+								<div class="head">${this.sb.length}</div>
+								<div class="content home">${obj.home ? obj.home : 0}</div>
+								<div class="content visitor">${obj.visitor ? obj.visitor : 0}</div>
+							</div>`;	
+
+							$container.insertAdjacentHTML('beforeend', tpl);
+						}
+					} else {
+						const $container = document.getElementById('scoreboard');
+						let tpl =`<div id="teams">
+							<div class="head">&nbsp;</div>
+							<div id="homeTeam" style="color: ${this.home.color}">${this.home.team}</div>
+							<div id="visitorTeam" style="color: ${this.visitor.color}">${this.visitor.team}</div>
+						</div>`;
+						
+						for (let i = 1; i < 10; i++) {
+							tpl = `${tpl}<div class="inning">
+								<div class="head">${i}</div>
+								<div class="content home">0</div>
+								<div class="content visitor">0</div>
+							</div>`;
+						}
+						tpl = `<div id="innings">${tpl}</div>`;
+						$container.insertAdjacentHTML('beforeend', tpl);
+					}
+				}
+				renderTotal() {		
+					if (this[this.team].totals[1]) {
+						const $container = document.getElementsByClassName('total')[this.totalCol];
+						
+						if (this[this.team].totals[this.totalCol]) {
+							$container.getElementsByClassName(`content ${this.team}`)[0].innerHTML = this[this.team].totals[this.totalCol];
+						}						
+					} else {
+						const $container = document.getElementById('scoreboard');
+						const list = ['R', 'H', 'E'];
+						const max = list.length;
+						let tpl =``;
+						
+						for (let i = 0; i < max; i++) {
+							tpl = `${tpl}<div class="total">
+								<div class="head">${list[i]}</div>
+								<div class="content home">0</div>
+								<div class="content visitor">0</div>
+							</div>`;
+						}
+						tpl = `<div id="totals">${tpl}</div>`;
+						$container.insertAdjacentHTML('beforeend', tpl);
+					}
+				}
+				renderCurrent(cond) {		
+					if (cond !== -1) {
+						const list = ['strikes', 'balls', 'outs'];
+						for (let i = arguments.length; i--;) {
+							//console.log(arguments[i]);
+							const $container = document.getElementsByClassName('col')[arguments[i]];
+						
+							$container.getElementsByClassName('content')[0].innerHTML = this[list[arguments[i]]];
+						}
+					} else {
+						const $container = document.getElementById('current');
+						const list = ['Strike', 'Ball', 'Out'];
+						const max = list.length;
+						let tpl =``;
+						
+						for (let i = 0; i < max; i++) {
+							tpl = `${tpl}<div class="col">
+								<div class="currentLabel">${list[i]}</div>
+								<div class="content">0</div>
+							</div>`;
+						}
+						$container.innerHTML = tpl;
+					}
+				}
+				renderPlayers(cond) {		
+					if (cond !== -1) {
+						const $container = document.getElementsByClassName('grid')[0];
+						
+						let pitchingTeam = 'home';
+						
+						if (this.team === 'home') {
+							pitchingTeam = 'visitor';
+						}
+						
+						switch(cond) {
+							case 0:
+								$container.getElementsByClassName('cell playerValue')[0].style.color = this[pitchingTeam].color;
+								$container.getElementsByClassName('cell playerValue')[1].style.color = this[this.team].color;
+								$container.getElementsByClassName('cell playerValue')[0].innerHTML = this[pitchingTeam].starters[this[pitchingTeam].pitcherIndex].name;
+								break;
+							case 1:
+								$container.getElementsByClassName('cell playerValue')[1].innerHTML = this[this.team].starters[this[this.team].batterIndex].name;
+								break;
+							case 2:
+								$container.getElementsByClassName('cell statusValue')[0].style.color = '#9ff';
+								$container.getElementsByClassName('cell statusValue')[0].innerHTML = this.status;
+								break;
+							default:
+								$container.getElementsByClassName('cell statusValue')[0].style.color = '#fff';
+								$container.getElementsByClassName('cell statusValue')[0].innerHTML = this.status;
+						}
+				
+					} else {
+						const $container = document.getElementById('players');
+
+						let tpl =`<table class="grid">
+							<tr>
+								<td class="cell playerLabel">On the Mound</td>
+								<td class="cell playerValue" style="color: ${this.visitor.color}">${this.visitor.starters[this.visitor.pitcherIndex].name}</td>
+							</tr>
+							<tr>
+								<td class="cell playerLabel">At Bat</td>
+								<td class="cell playerValue" style="color: ${this.home.color}">${this.home.starters[this.home.pitcherIndex].name}</td>
+							</tr>
+							<tr>
+								<td class="cell statusLabel">Status</td>
+								<td class="cell statusValue">${this.status}</td>
+							</tr>					
+						</table>`;
+						
+						$container.innerHTML = tpl;
+					}
+				}
+				setTeam(team) {
+					if (teamBool) {
+						home = team;
+						document.getElementById('homeTeam').innerHTML = home.team;
+						document.getElementById('homeTeam').setAttribute('style', `color: ${home.color}`);
+					} else {
+						visitor = team;
+						document.getElementById('visitorTeam').innerHTML = visitor.team;
+						document.getElementById('visitorTeam').setAttribute('style', `color: ${visitor.color}`);
+					}
+					teamBool = !teamBool;				
+				}
+				events() {
+					document.addEventListener('keypress', (e) => {
+						//console.log(e.keyCode);
+						const $container = document.getElementById('totals');
+						switch(e.keyCode) {
+							case 49:
+								this.multiplier = 10;
+								break;
+							case 50:
+								this.multiplier = 100;
+								break;								
+							case 51:
+								this.multiplier = 300;
+						}
+						if ($container.getElementsByClassName('winner').length) {
+							switch(e.keyCode) {
+								case 98:
+									this.setTeam(bos);
+									break;
+								case 109:
+									this.setTeam(nym);
+									break;
+								case 111:
+									this.setTeam(oak);
+									break;									
+								case 115:
+									this.setTeam(sf);
+									break;								
+								case 121:
+									this.setTeam(nyy);
+									break;
+								case 13:
+									const children = document.getElementById('scoreboard').childNodes;
+									for (let i = children.length; i--;) {
+										document.getElementById('scoreboard').removeChild(children[i]);
+									}
+									this.sb = [];
+									this.home = {
+										totals: [0, 0, 0],
+										batterIndex: 0
+									};
+									this.home = Object.assign({}, this.home, home);
+									this.visitor = {
+										totals: [0, 0, 0],
+										batterIndex: -1
+									};
+									this.visitor = Object.assign({}, this.visitor, visitor);
+									this.balls = 0;
+									this.strikes = 0;
+									this.outs = 0;
+									this.team = 'home';
+									this.inning = 0;
+									this.totalCol = 0;
+									this.prevClass = '';
+									this.prevInning = 0;
+									this.prevTeam = 'visitor';
+									this.status = 'Game started...';
+									this.base = [0, 0, 0];
+									this.animList = [];
+									this.renderScoreboard();
+									this.renderTotal();
+									this.renderCurrent(-1);
+									this.renderPlayers(-1);
+									this.start();
+							}
+						}
+					}, true);
+				}
+				init() {
+					this.renderScoreboard();
+					this.renderTotal();
+					this.renderCurrent(-1);
+					this.renderPlayers(-1);
+					this.events();
+					this.start();
+				}
+			}
+			new Baseball(home, visitor, location.search ? parseInt(location.search.substring(1), 10) : 100);
+		</script>
+	</body>
+</html>

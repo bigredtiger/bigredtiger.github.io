@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Blackjack</title>
+	<meta charset="utf-8" />
+
+<style>
+
+body {
+	background-color: #000;
+	color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center; /* !!! */
+  font-family: arial;
+  font-size: 13px;
+  }
+#base {
+  text-align: left;
+  border: 1px solid #333;
+  padding: 0;
+  width: 800px;
+  height: 400px;
+  position: absolute;
+  margin-top: -200px;
+  margin-left: -400px;
+  top: 50%;
+  left: 50%;  
+  }
+#table {
+	margin: 60px 100px;
+	}
+#menu {
+	clear: left;
+  float: left;
+  margin: 16px 0;
+  padding: 0;
+  }
+.menuItem {
+  float: left;
+  list-style-type: none;
+  padding: 0 10px 0 0;
+  }
+.menuLink {
+  font-weight: normal;
+  text-decoration: none;
+  color: #fff;  
+  }
+.card {
+	border: 1px solid #fff;
+	background-color: #fff;
+	width: 30px;
+	height: 60px;
+	padding: 10px;
+	margin-right: 20px;
+	float: left;
+	font-family: times, serif;
+	font-weight: bold;
+	font-size: 1.3em;
+	}
+.suit {
+	font-weight: normal;
+	padding-top: 8px;
+	text-align: center;
+	}
+.redSuit {
+	color: #ff0000;
+	}
+.blackSuit {
+	color: #000;
+	}
+.winner {
+	font-size: 1.2em;
+	font-weight: bold;
+	color: lightgreen;
+	}
+#computer {
+	overflow: hidden;
+	}
+#player {
+	margin-top: 60px;
+	clear: left;
+	}
+.faceDown {
+	background-color: #000;
+	}
+.noShow {
+	display: none;
+	}
+#myCanvas {
+	background-color: #efefef;
+	position: absolute;
+	display: none;
+	}
+#station {
+  clear: left;
+  }
+#betAmt {
+  width: 130px;
+  font-size: 1.2em;
+  }
+.activ {
+	background-color: #ffff99;
+  border: 1px solid #333;
+	color: #000;
+	font-weight: bold;
+	}
+.formLabel {
+  font-size: 1.2em;
+  margin-right: 3px;
+  }
+.topCol {
+  padding-top: 4px;
+  }
+.formCol {
+  margin-right: 16px;
+  float: left;
+  height: 20px;
+  }
+.deact {
+	border: 0;
+	background-color: #000;
+	color: #fff;
+	font-weight: normal;
+	}
+</style>  
+
+</head>
+<body>
+<div id="base">
+	<div id="table">
+		<div id="computer"></div>
+		<div id="player"></div>
+		<ul id="menu">
+			<li class="menuItem"><a href="#" id="deal" class="menuLink">Deal</a></li>
+			<li class="menuItem"><a href="#" id="hit" class="menuLink">Hit</a></li>
+      <li class="menuItem"><a href="#" id="stand" class="menuLink">Stand</a></li>
+		</ul>
+    <canvas id="myCanvas" width="10" height="10"></canvas>
+    <div id="station">
+      <form>
+        <div class="formCol topCol"><label class="formLabel">$</label><label class="formLabel" id="amt">100</label></div>
+        <div class="formCol"><label class="formLabel">Bet </label><label class="formLabel">$</label><input type="text" id="betAmt" class="activ" value="10"></div>
+      </form>
+    </div>
+	</div>
+</div>
+<!-- <script src="http://code.jquery.com/jquery-latest.js"></script> -->
+<script src="jquery-1.7.2.min.js"></script>
+<script>
+var blkjk = (function() {
+
+	var cards = [],
+		suits = ['d', 'c', 'h', 's'],
+		pHand = [],
+		cHand = [],
+		res = 0,
+		suitImg = {},
+    msgAry = [null, 'Busted!', 'You Win!', 'Busted!', 'House Wins!', 'Push'],
+    checkOnce = false;
+    
+	function doMsg(num, bool) {
+    var selector, resultCls;
+  
+		if (num > 0) {
+      var resultCls = 'result';
+			if (num === 2) {
+				resultCls = 'winner';
+			}
+      if (bool) {
+        selector = '#computer';
+      } else {
+        selector = '#player';
+      }
+			$(selector).append('<div class="' + resultCls + '">' + msgAry[num] + '</div>');
+		}
+	}
+	
+	function whichResult(bool) {
+		var sum = 0,
+			ace = 0,
+			tmpHand,
+      pad = 0;
+			
+		if (bool) {
+			tmpHand = cHand;
+      pad = 2;
+		} else {
+			tmpHand = pHand;
+		}
+		for (var i = tmpHand.length; i--;) {
+			sum = sum + tmpHand[i];
+			if (tmpHand[i] === 1) {
+				ace++;
+			}
+		}
+		if (ace) {
+			var tmpsum = (sum - 1) + 11;
+			if (tmpsum === 21) {
+				return 2 + pad;
+			}
+		}
+		if (sum > 21) {
+			return 1 + pad;
+		} else if (sum === 21) {
+			return 2 + pad;
+		}
+		return 0;
+	}
+	
+  function resetBet() {
+    var bRaw = $('#betAmt').val(),
+			b = parseInt(bRaw),
+      a = parseInt($('#amt').html()),
+			exp = /^\d+$/,
+			isNum = exp.test(bRaw);
+			//console.log('TEST' + isNum + ' ' + (typeof bRaw));
+    if (b > a || b <= 0 || !isNum) {
+      $('#betAmt').val('');
+    }  
+  }
+  
+  function calc(result) {
+    var $b = $('#betAmt'),
+			b = parseInt($b.val() === '' ? 0 : $b.val()),
+      a = parseInt($('#amt').html());
+    if (result === 2 || result === 3) {
+      //console.log(parseInt($('#amt').html()) + parseInt($('#betAmt').val()) * 2);
+      $('#amt').html(a + b);
+    } else if (result === 1 || result === 4) {
+      //console.log(parseInt($('#betAmt').val()));
+      $('#amt').html(a - b);
+    }
+    resetBet();
+		$b.removeClass('deact');
+    $b.attr('readonly', false);
+    $b.focus();
+  }
+  
+	function doResult() {
+		var result = whichResult(0);
+		doMsg(result, 0);
+    console.log(result + ', ' + checkOnce);
+    if (result === 0 && checkOnce) {
+      console.log('inside');
+      result = whichResult(1);
+      doMsg(result, 1);
+      if (result === 4) {
+        reveal();
+      }
+      checkOnce = false;
+    }
+    if (result !== 0) {
+      calc(result);
+    }
+		return result;
+	}  
+  
+	function isUnique(val) {
+		if (cards.length === 52) {
+			alert('Shuffling deck...');
+			cards = [];
+			return true;
+		}
+		for (var i = cards.length; i--;) {
+			if (cards[i] === val) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	function getCard() {
+		var c, s, card;
+	  do {
+      c = (Math.floor(Math.random() * 13)) + 1;
+      s = Math.floor(Math.random() * 4);
+			card = c + '-' + s;
+    } while (!isUnique(card));
+		cards.push(card);
+		return card;
+	}
+	
+	function diamond(c) { 
+		c.moveTo(5, 0); 
+		c.lineTo(0, 5); 
+		c.lineTo(5, 10); 
+		c.lineTo(10, 5); 
+		c.lineTo(5, 0); 
+	}
+	
+	function heart(c) {
+		c.arc(2.5, 2, 2, 0, Math.PI * 2, true);
+		c.arc(7.5, 2, 2, 0, Math.PI * 2, true);
+		c.moveTo(0, 2);
+		c.lineTo(5, 10);
+		c.lineTo(10, 2);
+		c.lineTo(0, 2);
+	}
+	
+	function spade(c) {
+		c.moveTo(5, .5);
+		c.lineTo(9.5, 4.5);
+		c.lineTo(.5, 4.5);
+		c.lineTo(5, 0);	
+		c.arc(2.5, 5, 1.5, 0, Math.PI * 2, true);
+		c.arc(7.5, 5, 1.5, 0, Math.PI * 2, true);
+		c.moveTo(5, 6);
+		c.lineTo(7, 10);
+		c.lineTo(3, 10);
+		c.lineTo(5, 6);
+	}
+	
+	function club(c) {
+		c.arc(2.5, 5, 1.5, 0, Math.PI * 2, true);
+		c.arc(7.5, 5, 1.5, 0, Math.PI * 2, true);
+		c.arc(5, 2, 1.5, 0, Math.PI * 2, true);
+		c.moveTo(5, 6);
+		c.lineTo(7, 10);
+		c.lineTo(3, 10);
+		c.lineTo(5, 6);
+	}
+	
+	function draw(id) {
+		try {
+			var canvas = document.getElementById('myCanvas'); 
+			context = canvas.getContext('2d'); 
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.save();
+      context.beginPath(); 
+			blkjk[id](context); 
+			context.lineWidth = 1; 
+			var myColor = 'black';
+			if (id === 'h' || id === 'd') {
+				myColor = 'red';
+			}
+			context.strokeStyle = myColor; 		
+			context.stroke(); 
+			context.fillStyle = myColor; 
+			context.fill(); 			
+			context.restore();	
+			suitImg[id] = new Image();
+      suitImg[id].src = canvas.toDataURL("image/png");
+		} catch(e) {}
+	}	
+	
+	function renderCard(str, bool, i) {
+		var c, s, cls, cval, card = '';
+		c = parseInt(str.split('-')[0]);
+		s = parseInt(str.split('-')[1]);
+		cval = (c === 11 || c === 12 || c === 13) ? 10 : c;
+		if (bool) {
+			cHand.push(cval);
+		} else {
+			pHand.push(cval);		
+		}
+		//console.log(s % 2);
+		if (s % 2 === 0) {
+			cls = 'redSuit';
+		} else {
+			cls = 'blackSuit';
+		}
+		switch(c) {
+			case 1:
+				c = 'a';
+				break;
+			case 11: 
+				c = 'j';
+				break;
+			case 12:
+				c = 'q';
+				break;
+			case 13:
+				c = 'k';
+		}
+		if (bool && i === 0) {
+			card += '<div class="card faceDown"></div>';
+			cls += ' noShow';
+		}
+    soot = suits[s];
+    if (suitImg[soot]) {
+      soot = '<img src="' + suitImg[soot].src+'">';
+    }
+		card += '<div class="card ' + cls + '">' + c + '<div class="suit">' + soot + '</div></div>';
+		return card;
+	} 
+	
+  function reveal() {
+    $('.faceDown').hide();
+    $('.noShow').removeClass('noShow');
+  }
+  
+  function isOver() {
+    var sum = 0;
+    for (var i = cHand.length; i--;) {
+      sum = sum + cHand[i];
+    }
+    return (sum >= getSum(0) && sum > 15);
+  }
+  
+  function getSum(bool) {
+    var sum = 0,
+      tmpHand,
+			ace = 0;
+    if (bool) {
+			tmpHand = cHand;
+		} else {
+			tmpHand = pHand;
+		}
+    for (var i = tmpHand.length; i--;) {
+      sum = sum + tmpHand[i];
+			if (tmpHand[i] === 1) {
+				ace++;
+			}
+    } 
+		if (ace) {
+			var tmpsum = (sum - 1) + 11;
+			if (tmpsum <= 21 && tmpsum > sum) {
+				sum = tmpsum
+			}
+		}
+    return sum;
+  }
+  
+  function stand() {
+    reveal();
+    //checkOnce = true;
+    while (!isOver()) {
+      hit(1);
+    }
+    var result = whichResult(1);
+    doMsg(result, 1);
+    if (result === 0) {
+      if (getSum(0) > getSum(1)) {
+        result = 2;
+        doMsg(result, 0);
+      } else if (getSum(0) < getSum(1)) {
+        result = 4;
+        doMsg(result, 1);
+      } else {
+        result = 5;
+        doMsg(result, 0);
+      }
+    }
+    calc(result);
+    res = result;
+    
+  }
+  
+	function doHand(bool) {
+		var cardAry = [];
+		for (var i = 0; i < 2; i++) {
+			cardAry[i] = renderCard(getCard(), bool, i);
+		}
+		if (bool) {
+			$('#computer').html(cardAry.join(''));
+		} else {
+			$('#player').html(cardAry.join(''));
+		}
+		console.log(cards);
+	}
+	
+	function hit(bool) {
+    if (bool) {
+      $('#computer').append(renderCard(getCard(), 1));
+    } else {
+      $('#player').append(renderCard(getCard(), 0));
+    }
+	}
+	
+	function deal() {
+		var b = $('#betAmt');
+    b.attr('readonly', true);
+		b.addClass('deact');
+		
+		res = 0;
+    checkOnce = true;
+		pHand = [];
+		cHand = [];
+		if (cards.length > 39) {
+			cards = [];
+		}
+		doHand(1);
+		doHand(0);    
+	}
+	
+  function events() {
+		$('#menu').click(function(e) {
+			var targ = e.target.id;      
+			if (targ === 'deal' && res !== 0) {
+				deal();
+			} else if (targ === 'hit' && res === 0) {
+				hit(0);
+			} else if (targ === 'stand' && res === 0) {
+        stand();
+      }
+			if (res === 0) {
+				res = doResult();
+			}
+		});   
+    
+    $('#betAmt').on('keyup keydown', function(e) {
+      resetBet();
+    });    
+  }
+
+  function init() {
+		for (var i = suits.length; i--;) {
+			draw(suits[i]);
+		}
+		deal();
+		res = doResult();
+		events();
+  }
+  
+  return {
+		init: init,
+		d: diamond,
+		h: heart,
+		s: spade,
+		c: club
+  }
+})();
+
+blkjk.init();
+</script>
+
+</body>
+</html>

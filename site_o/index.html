@@ -22,7 +22,7 @@
 	<h1>BigRedTiger.com</h1>
 	<h2>Simon Wong :: BigRedTiger.com</h2>
 </header>
-<nav id="mainNav"></nav>
+<nav></nav>
 <article id="homePage">
 	<section id="splashBox">
 		<div id="pic"></div>
@@ -37,8 +37,7 @@
 <article id="photosPage">
 	<section id="photoBox">
 		<p id="counter"></p>
-		<img id="myImg" title="Next" />
-		<a href="#" id="left" title="Previous"></a>
+		<img id="myImg" />
 		<p id="desc"></p>
 	</section>
 	<nav id="photoNav">
@@ -55,41 +54,30 @@
 		<section id="myPic" title="Simon Wong's Picture"></section>
 		<section class="links">
 		<ul>
-			<li><a href="resume_simon.docx" target="_blank" title="Simon Wong's Resume">Technical Resume</a></li>
+			<li><a href="resume_simon.doc" target="_blank" title="Simon Wong's Resume">Technical Resume</a></li>
 		</ul>
 		</section>
 	</section>
 </article>
 <article id="gamesPage">
-	<section class="links">
-	<ul id="gameCube">
-		<li class="cat"><span class="catName">Games</span>
-		<ul class="gameBox">
-			<li class="game"><a href="games/ttt.html" target="_blank" title="Tic-tac-toe" class="gameLink">Tic-tac-toe</a></li>
-			<li class="game"><a href="games/blkjk.html" target="_blank" title="Blackjack" class="gameLink">Blackjack</a></li>
-			<li class="game"><a href="games/btlshp.html" target="_blank" title="Battleship" class="gameLink">Battleship</a></li>
-			<li class="game"><a href="games/ski.html" target="_blank" title="Ski" class="gameLink">Ski</a></li>
-			<li class="game"><a href="games/tetris.html" target="_blank" title="Tetris" class="gameLink">Tetris</a></li>
+	<section id="gamesNav">
+		<section id="gamesSplash" title=""></section>
+		<section class="links">
+		<ul>
+			<li><a href="games/ttt.html" target="_blank" title="Tic-tac-toe" id="g_Ttt">Tic-tac-toe</a></li>
+			<li><a href="games/blkjk2.html" target="_blank" title="Blackjack" id="g_Bj">Blackjack</a></li>
+			<li><a href="games/blkjk.html" target="_blank" title="Blackjack" id="g_Bj">Blackjack (Chrome)</a></li>
+			<li><a href="games/btlshp.html" target="_blank" title="Battleship" id="g_Bs">Battleship</a></li>
+			<li><a href="games/ski.html" target="_blank" title="Ski">Ski</a></li>
+			<li><a href="games/tetris.html" target="_blank" title="Tetris">Tetris</a></li>
+			<li><a href="games/mono.html" target="_blank" title="Monopoly">Monopoly</a></li>
 		</ul>
-		</li>
-		<li class="cat"><span class="catName">Sims</span>
-		<ul class="gameBox">
-			<li class="game"><a href="games/mono.html" target="_blank" title="Monopoly" class="gameLink">Monopoly</a></li>
-		</ul>
-		</li>
-	</ul>
+		</section>
 	</section>
+	<iframe id="gamesBox" name="gamesBox"></iframe>
 </article>
 <footer>Copyright &copy; 2000-<span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
 <script src="data.js"></script>
 <script src="simon.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-

@@ -1,0 +1,89 @@
+<!DOCTYPE html> 
+<html>
+<head> 
+	<meta charset="utf-8" /> 
+	<title>date</title> 
+</head>
+<body>
+<style>
+body {
+	font-family: times, serif;
+	font-size: 1em;
+	background-color: #333333;
+	color: black;
+	}
+h2 {
+	margin: 0;
+	font-size: 1.7em;
+	}
+article {
+	padding: 10px;
+	background-color: #cccccc;
+	width: 18%;
+	border: double;
+	}
+section {
+	margin: 20px 0;
+	}
+time, footer {
+	font-size: .8em;
+	}
+</style>
+<article>
+	<header>
+		<hgroup>
+			<h2>Article 1</h2>
+			<time datetime="2011-08-30">Monday, August 30, 2011</time>
+		</hgroup>
+	</header>
+	<section>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam commodo dictum vehicula. Duis orci arcu, facilisis sit amet tristique eu, egestas eget lectus.</section>
+	<footer>
+		<span>This article is <span id="eDays"></span> days old.</span>
+	</footer>
+</article>
+<script>
+var ARTICLE = {
+	model: {
+		date2: new Date()
+	},
+
+	view: {
+		$date1: null
+	},
+	
+	calcDays: function(date1, date2) {
+		var DAY = 1000 * 60 * 60 * 24,
+		date1Ms = date1.getTime(),
+		date2Ms = date2.getTime(),
+		diffMs = Math.abs(date1Ms - date2Ms);
+		
+		return Math.round(diffMs / DAY)
+	},
+	
+	getDate: function() {
+		var vDate = document.getElementsByTagName('time')[0].getAttribute('datetime'), dAry = vDate.split('-'), d = ARTICLE.view.$date1;
+		d = new Date();
+		d.setDate(dAry[2]);
+		d.setMonth(dAry[1]-1);
+		d.setFullYear(dAry[0]);
+		ARTICLE.view.$date1 = d;
+	},
+	
+	setDay: function(val) {
+		if (!parseInt(val)) {
+			val = 'N/A';
+		}
+		document.getElementById('eDays').innerHTML = val;
+	},
+	
+	init: function() {
+		ARTICLE.getDate();
+		ARTICLE.setDay(ARTICLE.calcDays(ARTICLE.view.$date1, ARTICLE.model.date2));
+	}
+	
+};
+
+window.onload = ARTICLE.init;
+</script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Blackjack Deluxe</title>
+		<style>
+			body {
+				background-color: #000;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				color: #fff;
+				display: flex;
+				justify-content: center;
+				margin: 0;
+				align-items: center;	
+				min-height: 90vh;
+			}
+			.container {
+				display: flex;
+				border: 1px solid #666;
+				min-height: 85vh;
+				flex: 0 0 95%;
+				flex-flow: row wrap;
+				justify-content: center;
+				padding-left: 10px;
+			}
+			.dealer, .player {
+				display: flex;
+				flex: 0 0 100%;
+				flex-flow: row wrap;
+				padding-top: 10px;
+			}
+			.cardContainer {
+				flex: 0 0 6%;
+				margin: 0 10px 10px 0;
+				min-width: 70px;
+			}
+			.card {
+				height: 110px;
+				background-color: #fff;
+				border-radius: 3px;
+				padding: 6px;
+			}
+			.card.down {
+				display: none;
+			}
+			.value {
+			    font-family: times, serif;
+				font-size: 2em;
+				font-weight: bold;
+			}
+			.suit {
+				font-size: 3em;
+				text-align: center;
+				margin-top: 0px;
+			}
+			.faceDown {
+				height: 100%;
+				border-radius: 3px;
+				background: linear-gradient(115deg, transparent 75%, rgba(255,255,255,.8) 75%) 0 0,
+					linear-gradient(245deg, transparent 75%, rgba(255,255,255,.8) 75%) 0 0,
+					linear-gradient(115deg, transparent 75%, rgba(255,255,255,.8) 75%) 7px -15px,
+					linear-gradient(245deg, transparent 75%, rgba(255,255,255,.8) 75%) 7px -15px, purple;
+				background-size: 15px 30px;		
+			}
+			.value.spade, .value.club {
+				color: #000;
+			}
+			.value.diamond, .value.heart {
+				color: #f00;
+			}
+			.suit.diamond:before {
+				content: "\2666";
+				color: #f00;
+			}			
+			.suit.club:before {
+				content: "\2663";
+				color: #000;
+			}			
+			.suit.heart:before {
+				content: "\2665";
+				color: #f00;
+			}
+			.suit.spade:before {
+				content: "\2660";
+				color: #000;
+			}
+			.cardSum {
+				font-size: 2em;
+				color: #666;
+			}
+			.gameResult {
+				font-size: 2.1em;
+				margin-left: 6px;
+			}
+			.controls {
+				flex: 0 0 75%;
+				align-self: flex-end;
+			}
+			.money {
+				flex: 0 0 25%;
+				align-self: flex-end;
+				display: flex;
+				justify-content: flex-end;
+				margin-bottom: 10px;
+			}
+			.bet {
+				background-color: #333;
+				border-radius: 20px;
+				padding: 12px 10px 8px 10px;
+				font-size: 1.3em;
+			}
+			.total {
+				font-size: 2em;
+				color: #666;
+				margin-left: 20px;
+			}
+			.amt {
+				font-size: 3em;
+				color: cyan;
+				margin-right: 10px;
+			}
+			.controlButton {
+				padding: 10px 20px;
+				font-size: 2em;
+				background-color: #aaa;
+				color: #fff;
+				border: 3px solid #666;
+				margin: 0 5px 10px 0;
+				min-width: 120px;
+				letter-spacing: 1px;
+				text-transform: uppercase;
+			}
+			.active {
+				background-color: green;
+				border-color: darkgreen;
+			}
+			.active:active {
+				background-color: darkgreen;
+				box-shadow: 0 -3px #666;
+				transform: translateY(3px);
+			}
+			/* Ripple magic */
+			.active {
+				position: relative;
+				overflow: hidden;
+			}
+
+			.active:after {
+				content: '';
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				width: 5px;
+				height: 5px;
+				background: rgba(255, 255, 255, .5);
+				opacity: 0;
+				border-radius: 100%;
+				transform: scale(1, 1) translate(-50%);
+				transform-origin: 50% 50%;
+			}
+
+			@keyframes ripple {
+				0% {
+					transform: scale(0, 0);
+					opacity: 1;
+				}
+				20% {
+					transform: scale(25, 25);
+					opacity: 1;
+				}
+				100% {
+					opacity: 0;
+					transform: scale(40, 40);
+				}
+			}
+			.active:focus:not(:active)::after {
+				animation: ripple .6s ease-out;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="dealer"></div>
+			<div class="player"></div>
+			<div class="controls"></div>
+			<div class="money">
+				<span class="bet"></span>
+				<span class="total">$</span>
+				<span class="amt"></span>
+			</div>
+		</div>
+		<script>
+			class BlackjackDeluxe {
+				constructor(decks, suits, values) {
+					console.log('Running...');
+					this.suitsMap = ['diamond', 'club', 'heart', 'spade'];
+					this.dealt = null;
+					this.decks = decks || 6;
+					this.suits = suits || 4;
+					this.values = values || 13;
+					this.numDealt = 0;
+					this.maxCards = this.decks * this.suits * this.values;
+					this.sum = {};
+					this.card = {};
+					this.aces = {};
+					this.amt = 100;
+					this.betAmt = 0;
+					this.init();
+				}
+				shuffle() {
+					this.dealt = new Array(this.decks);
+					for (let i = 0; i < this.decks; i++) {
+						this.dealt[i] = new Array(this.suits);
+						for (let j = 0; j < this.suits; j++) {
+							this.dealt[i][j] = new Array(this.values + 1);
+						}
+					}
+					//console.log(this.dealt);
+				}
+				reShuffle() {
+					for (let i = 0; i < this.decks; i++) {
+						for (let j = 0; j < this.suits; j++) {
+							for (let k = 1; k <= this.values; k++) {
+								this.dealt[i][j][k] = 0;
+							}
+						}
+					}
+				}				
+				drawCard() {
+					let val, suit, card;
+					do {
+						val = (Math.floor(Math.random() * this.values)) + 1;
+						suit = Math.floor(Math.random() * this.suits);
+						card = { val, suit };
+					} while (!this.isUnique(card));
+					this.record(card);
+					return card;
+					
+				}
+				record(card) {
+					const list = this.dealt;
+					this.numDealt++;
+					for (let i = 0; i < this.decks; i++) {
+						if (!list[i][card.suit][card.val]) {
+							list[i][card.suit][card.val] = 1;
+							break;
+						}
+					}
+				}
+				isUnique(card) {
+					if (this.numDealt >= this.maxCards) {
+						this.numDealt = 0;
+						this.reShuffle();
+						return true;
+					}
+					let checked = 0;
+					for (let i = 0; i < this.decks; i++) {
+						if (this.dealt[i][card.suit][card.val]) {
+							checked++;
+						}
+					}
+					return !(checked === this.decks);
+				}
+				mapValue(val) {
+					switch(val) {
+						case 1:
+							return 'A';
+						case 11:
+							return 'J';
+						case 12:
+							return 'Q';
+						case 13:
+							return 'K';
+						default:
+							return val;
+					}
+				}
+				mapSuit(suit) {
+					return this.suitsMap[suit]; 
+				}
+				dealAll() {
+					for (let i = this.maxCards + 2; i--;) {
+						let card = this.drawCard();
+						this.renderCard(card);
+					}
+					console.log(this.dealt);				
+				}
+				adjustSum(prevSum, val, person) {
+					let sum = (val > 10 ? 10 : (val === 1 ? 11 : val));
+					sum = prevSum + sum;
+					if (sum > 21 && this.aces[person]) {
+						sum = sum - 10;
+						this.aces[person]--;
+					}
+					return sum;
+				}
+				deal(person) {
+					let sum = 0;
+					this.aces[person] = 0;
+					for (var i = 0; i < 2; i++) {
+						let card = this.drawCard();
+						this.renderCard(card, person, i);
+						if (card.val === 1) {
+							this.aces[person]++;
+						}						
+						sum = this.adjustSum(sum, card.val, person);
+					}
+					this.sum[person] = sum;
+					this.card[person] = i;
+				}
+				hit(person) {
+					let sum = 0;
+					const card = this.drawCard();
+					if (card.val === 1) {
+						this.aces[person]++;
+					}					
+					this.renderCard(card, person, this.card[person]++);					
+					this.sum[person] =  this.adjustSum(this.sum[person], card.val, person);
+				}
+				resetButtons() {
+					this.renderButton(BlackjackDeluxe.BUTTONS.DEAL, 1);
+					this.renderButton(BlackjackDeluxe.BUTTONS.HIT, 0);
+					this.renderButton(BlackjackDeluxe.BUTTONS.STAY, 0);
+					this.renderButton(BlackjackDeluxe.BUTTONS['2X'], 0);
+				}
+				compute(stay) {
+					const dealerSum = this.sum.dealer;
+					const playerSum = this.sum.player;
+					const dealerAces = this.aces.dealer;
+					const playerAces = this.aces.player;
+					console.log(dealerSum, dealerAces, playerSum, playerAces);
+					
+					if (dealerSum === 21 && playerSum === 21) {
+						this.doResult('Push', 'dealer', 0);
+					} else if (dealerSum === 21) {
+						this.doResult('Dealer wins!', 'dealer', -1);
+					} else if (playerSum === 21 && !stay) {
+						this.doResult('Blackjack!', 'player', 1.5);
+					} else if (playerSum > 21) {
+						this.doResult('Player busted', 'player', -1);
+					} else if (dealerSum > 21) {
+						this.doResult('Dealer busted', 'dealer', 1);		
+					} else if (stay) {
+						if (playerSum > dealerSum) {
+							this.doResult('Player wins!', 'player', 1);
+						} else if (playerSum < dealerSum) {
+							this.doResult('Dealer wins!', 'dealer', -1);
+						} else {
+							this.doResult('Push', 'dealer', 0);
+						}
+					} else {
+						this.renderButton(BlackjackDeluxe.BUTTONS.HIT, 1);
+						this.renderButton(BlackjackDeluxe.BUTTONS.STAY, 1);
+						this.renderButton(BlackjackDeluxe.BUTTONS['2X'], 1);
+					}
+				}
+				bet() {
+					this.betAmt = this.betAmt + 15;
+					this.amt = this.amt - 15;
+					this.renderAmt(this.amt);
+					this.renderBet(this.betAmt);
+				}
+				adjustBet() {
+					if (this.betAmt > 15) {
+						this.betAmt = this.betAmt - 15;
+						this.amt = this.amt + 15;						
+					}
+					this.renderAmt(this.amt);
+					this.renderBet(this.betAmt);				
+				}
+				events() {
+					const $container = document.getElementsByClassName('controls')[0];
+					
+					$container.addEventListener('click', (e) => {
+						if (!e.target.className.includes('active')) {
+							return;
+						}
+						const targ = e.target.outerText.toLowerCase();
+						
+						switch(targ) {
+							case BlackjackDeluxe.BUTTONS.DEAL:
+								this.renderButton(BlackjackDeluxe.BUTTONS.DEAL);
+								this.adjustBet();
+								this.renderClear();
+								this.deal('dealer');
+								this.deal('player');
+								this.compute();
+								break;
+							case BlackjackDeluxe.BUTTONS.HIT:
+								this.renderButton(BlackjackDeluxe.BUTTONS['2X']);
+								this.hit('player');
+								if (this.sum.player > 21) {
+									this.compute();
+								}
+								break;
+							case BlackjackDeluxe.BUTTONS['2X']:
+								this.hit('player');
+								this.bet();
+							case BlackjackDeluxe.BUTTONS.STAY:
+								this.renderButton(BlackjackDeluxe.BUTTONS.HIT);
+								this.renderButton(BlackjackDeluxe.BUTTONS.STAY);
+								while (this.sum.dealer < 17) {
+									this.hit('dealer');
+								}
+								this.compute(1);
+						}
+					}, true);
+				
+				}
+				doResult(msg, person, multi) {
+					this.renderResult(msg, person);
+					let nextPerson = 'dealer';
+					if (person === 'dealer') {
+						nextPerson = 'player';
+					}
+					this.renderResult('', nextPerson);
+					this.renderDealerCard();
+					this.resetButtons();	
+					this.amt = this.amt + (multi * this.betAmt);
+					this.renderAmt(this.amt);
+				}
+				renderButtons() {
+					const $container = document.getElementsByClassName('controls')[0];
+					const keys = Object.keys(BlackjackDeluxe.BUTTONS);
+					let tpl = ``;
+					
+					for (let i = keys.length; i--;) {
+						tpl = `${tpl}<button class="controlButton">${BlackjackDeluxe.BUTTONS[keys[i]]}</button>`;
+					}
+					$container.insertAdjacentHTML('beforeend', tpl);
+				}
+				renderBet(bet) {
+					const $container = document.getElementsByClassName('bet')[0];
+					$container.innerHTML = bet;
+				}
+				renderAmt(amt) {
+					const $container = document.getElementsByClassName('amt')[0];
+					if (amt % 1) {
+						amt = amt.toFixed(2);
+					}
+					$container.innerHTML = amt;
+				}
+				renderDealerCard() {
+					document.getElementsByClassName('card down')[0].className = 'card';
+					document.getElementsByClassName('card up')[0].className = 'card down';
+				}
+				renderButton(text, on) {
+					const $containers = document.getElementsByClassName('controlButton');
+					
+					for (let i = $containers.length; i--;) {
+						const txt = $containers[i].outerText.toLowerCase();
+						if (txt === text && on) {
+							$containers[i].className = 'controlButton active';
+						} else if (txt === text) {
+							$containers[i].className = 'controlButton';
+						}
+					}
+				}
+				renderClear() {
+					document.getElementsByClassName('dealer')[0].innerHTML = '';
+					document.getElementsByClassName('player')[0].innerHTML = '';
+				}
+				renderResult(result, person) {
+					const $container = document.getElementsByClassName(person)[0];
+					const tpl = `<span class="cardSum">${this.sum[person]}</span><span class="gameResult">${result}</span>`;
+					$container.insertAdjacentHTML('beforeend', tpl);
+				}
+				renderCard(card, person, i) {
+					const val = this.mapValue(card.val);
+					const suit = this.mapSuit(card.suit);
+					const $container = document.getElementsByClassName(person)[0];
+					let tpl = `<div id="${suit}_${val}_${i}" class="cardContainer"><div class="card">
+						<div class="value ${suit}">${val}</div>
+						<div class="suit ${suit}"></div>
+					</div></div>`;
+					if (person === 'dealer' && i === 1) {
+						tpl = `<div id="${suit}_${val}_${i}" class="cardContainer">
+							<div class="card down">
+								<div class="value ${suit}">${val}</div>
+								<div class="suit ${suit}"></div>
+							</div>						
+							<div class="card up">
+								<div class="faceDown"></div>
+							</div>
+						</div>`;					
+					}
+					$container.insertAdjacentHTML('beforeend', tpl);				
+				}
+
+				init() {
+					this.shuffle();
+					this.renderButtons();
+					this.renderButton(BlackjackDeluxe.BUTTONS.DEAL, 1);
+					this.events();
+					this.renderAmt(this.amt);
+					this.bet();
+					document.getElementsByClassName('controlButton')[0].click();
+				}
+			}
+			
+			BlackjackDeluxe.BUTTONS = (function() {
+				let obj = {};
+				let list = ['Deal', 'Hit', 'Stay', '2x', 'Split'];
+				for (let i = list.length; i--;) {
+					obj[list[i].toUpperCase()] = list[i].toLowerCase();
+				}
+				return obj;
+			}());
+			
+			new BlackjackDeluxe();
+		</script>
+	</body>
+</html>

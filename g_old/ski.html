@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ski</title>
+	<meta charset="utf-8" />
+
+<style>
+
+body {
+	background-color: #000;
+	color: #fff;
+  margin: 0;
+  padding: 0;
+  text-align: center; /* !!! */
+  font-family: arial;
+  font-size: 13px;
+	overflow: hidden;
+  }
+#base {
+  text-align: left;
+	background-color: #fff;
+  padding: 0;
+  width: 600px;
+  height: 380px;
+  position: absolute;
+  margin-top: -190px;
+  margin-left: -300px;
+  top: 50%;
+  left: 50%;  
+  }
+#content {
+	margin: 0;
+	}
+#soil {
+	position: relative;
+	top: 0;
+	height: 380px;
+	}
+.row {
+	position: absolute;
+	top: 350px;
+	width: 100%;
+	z-index: 300;
+	}
+/*
+div[id^=t1] .trunk {
+	background-color: orange;
+	}*/
+.tree {
+	float: left;
+	width: 60px;
+	height: 90px;
+	background-color: transparent;
+	}
+.leaves {
+	float: left;
+	width: 60px;
+	height: 80px;
+  background-color: cyan;
+	}
+.trunk {
+	float: left;
+	width: 10px;
+  border-left: 3px solid #CC6633;
+  border-right: 7px solid #663333;
+  border-top: 2px solid #663333;
+	height: 8px;
+	background-color: brown;
+	margin-left: 20px;
+	}
+.path {
+	float: left;
+	width: 60px;
+	height: 30px;
+	background-color: transparent;
+	}
+#top, #bottom {
+	position: absolute;
+	z-index: 1000;
+	background-color: #000;
+	height: 90px;
+	width: 100%;
+	top: -60px;
+	}
+#bottom {
+	top: 350px;
+	}
+#guy {
+	width: 33px;
+	height: 30px;
+	background-color: blue;
+	position: absolute;
+	top: 175px;
+	left: 276px;
+	z-index: 100;
+	}/*
+#left, #right {
+	width: 60px;
+	height: 20px;
+	border: 1px solid cyan;
+	margin: 5px 5px 5px 0;
+	float: left;
+	cursor: pointer;
+	}
+#left {
+	margin-left: 237px;
+	}
+#left:hover, #right:hover {
+	background-color: cyan;
+	}*/
+#myCanvas, #guyCanvas {
+	position: absolute;
+	display: none;
+	}/*
+#guyCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;	
+	display: block;
+	}
+#myCanvas {
+	display: block;
+	z-index: 1000;
+	top: 20px;
+	left: 20px;
+	}*/
+.container {
+	position: absolute;
+	border: 1px solid blue;
+	background-color: cyan;
+	width: 80px;
+	height: 60px;/*70px;*/
+	opacity: .3;
+	top: 60px;
+	left: 30px;
+	z-index: 1000;
+	-moz-box-shadow: 10px 10px 5px #888;
+	-webkit-box-shadow: 10px 10px 5px #888;
+	box-shadow: 10px 10px 5px #888;
+	}
+.menu {
+	position: absolute;
+	top: 60px;
+	left: 30px;
+	z-index: 1001;
+	}
+#menu {
+	margin: 0;
+	padding: 10px;
+	}
+.menuItem {
+  list-style-type: none;
+  padding-bottom: 6px;
+  }
+.menuLink, .menuLink:visited {
+  font-size: 1.1em;
+  color: blue;
+  text-decoration: none;
+  }
+.menuLink:hover, .menuLink:visited:hover {
+  color: brown;
+  }  
+.menuLink:active, .menuLink:visited:active {
+  color: red;
+  }
+#sky {
+	position: absolute;
+	top: 30px;
+	width: 600px;
+	height: 163px;
+	background-color: #3399ff;
+	}
+#snow {
+	position: absolute;
+	top: 193px;
+	width: 600px;
+	height: 163px;
+	background-color: #fff;
+	}
+</style>  
+
+</head>
+<body>
+<div id="base">
+	<div id="content">
+		<div id="soil"></div>
+		<div id="guy"></div>
+		<div id="top"></div>
+		<div id="bottom">
+			<div id="left"></div>
+			<div id="right"></div>
+		</div>
+		<div id="sky"></div>
+		<div id="snow"></div>
+	</div>
+	<div class="container"></div>
+	<div class="menu">
+    <ul id="menu">
+      <li class="menuItem"><a href="#" class="menuLink" id="ski">Ski</a></li>
+      <li class="menuItem"><a href="#" class="menuLink" id="ride">Ride</a></li>
+			<li class="menuItem"><a href="#" class="menuLink" id="green" title="Easy">Beginner</a></li>
+			<li class="menuItem"><a href="#" class="menuLink" id="blue" title="Medium">Intermediate</a></li>
+			<li class="menuItem"><a href="#" class="menuLink" id="black" title="Difficult">Advanced</a></li>
+			<li class="menuItem"><a href="#" class="menuLink" id="dBlack" title="Expert">Expert</a></li>
+			<li class="menuItem"><a href="#" class="menuLink" id="rand" title="Random">Random</a></li>
+		</ul>
+  </div>
+</div>
+<canvas id="myCanvas" width="60" height="80"></canvas>
+<canvas id="guyCanvas" width="200" height="200"></canvas>
+<!-- <script src="http://code.jquery.com/jquery-latest.js"></script> -->
+<script src="jquery-1.7.2.min.js"></script>
+<script>
+var ski = (function() {
+	var treeCoord = [],
+		stopped = false,
+		menuClicked = false,
+    leavesSrc = getImg(drawTree),
+		guySrc = getImg(drawGuy),
+		treeStyle = leavesSrc !== '' ? 'style="background: url(' + leavesSrc + ') no-repeat transparent"' : '',
+		initGuyBg = 'url(' + guySrc + ') no-repeat transparent 0 -31px',
+		endGuyBg = 'url(' + guySrc + ') no-repeat transparent -35px -31px',
+		rightGuyBg = 'url(' + guySrc + ') no-repeat transparent -69px -31px',
+		leftGuyBg = 'url(' + guySrc + ') no-repeat transparent -103px -31px',
+		guyMaxWidth = 34,
+		timer = [],
+		timerZ,
+		//duration = 1600,
+		duration = 2000,
+		trees = 2,
+		levAry = [[2, 10]],
+		levBg = [],
+		levBgHover = [],
+		algAry = [
+			function() {
+				return Math.floor(Math.random() * 2);
+			},
+			function() {
+				return true;
+			},
+			(function() {
+				var num;
+				return function(i, j, c) {
+					var val;
+					
+					if (i === 0 && j === 0 && c === 0) {
+						num = Math.floor(Math.random() * 10);
+					}
+					console.log('CNT', c);
+					if (i === num) {
+						val = false;
+					} else {
+						val = true;
+					}
+					return val;
+				}
+			})(),
+			(function() {
+				var cnt, bool;
+				return function(i, j, c) {
+				
+					if (i === 0 && j === 0 && c === 0) {
+						bool = Math.floor(Math.random() * 2);
+						if (bool) {
+							cnt = 0;
+						} else {
+							cnt = 9;
+						}
+					}					
+					
+					if (c % 2 === 0) {					
+						if (i === 0 && j % 2 === 0) {
+							if (bool) {
+								cnt++;
+							} else {
+								cnt--;
+							}
+						}					
+						if (j % 2 !== 0 && (i === 0 || i === (bool ? (cnt + 1) : cnt))) {//+1
+							return false;
+						} else if (j % 2 === 0 && i === cnt) {
+							return false;
+						} else {
+							return true;
+						}						
+					} else {
+						if (i === 0 && j % 2 === 0) {
+							if (bool) {
+								cnt--;
+							} else {
+								cnt++;
+							}
+						}
+						if (j % 2 !== 0 && (i === 0 || i === (bool ? (cnt + 1) : cnt))) {//+1
+							return false;
+						} else if (j % 2 === 0 && i === (bool ? (cnt + 1) : (cnt - 1))) {//+1
+							return false;
+						} else {
+							return true;
+						}
+					}
+				}
+			})(),
+			(function() {
+				var map = [
+					[1,1,1,1,0,0,1,1,1,1],
+					[0,1,1,1,1,0,0,1,1,1],
+					[1,1,1,1,0,0,1,1,1,1],
+					[0,1,1,1,1,0,0,1,1,1],
+					[1,1,1,1,0,0,1,1,1,1],
+					[0,1,1,1,1,0,0,1,1,1],
+					[1,1,1,1,0,0,1,1,1,1],
+					[0,1,1,1,1,0,0,1,1,1],
+					[1,1,1,1,0,0,1,1,1,1],
+					[0,1,1,1,0,0,0,1,1,1],
+					[1,1,1,0,0,0,0,1,1,1],
+					[0,1,0,0,0,0,0,0,1,1],
+					[1,1,0,0,1,1,0,0,1,1],
+					[0,1,0,0,1,1,1,0,0,1],
+					[1,0,0,1,1,1,1,0,0,1],
+					[0,1,0,1,1,1,1,1,0,1],
+					[1,0,0,1,1,1,1,0,0,1],
+					[0,0,0,1,1,1,1,1,0,1],
+					[1,1,1,1,1,1,1,1,1,1],
+					[0,1,1,1,1,1,1,1,1,1]
+				], lastRow, val1, val2;
+				return function(i, j, c) {
+					if (i === 0 && j === 0) {
+						var bool = Math.floor(Math.random() * 2);
+						if (bool) {
+							map[18][1] = 0;
+							map[19][1] = 0;
+							map[18][8] = 1;
+							map[19][8] = 1;
+						} else {
+							map[18][1] = 1;
+							map[19][1] = 1;
+							map[18][8] = 0;
+							map[19][8] = 0;
+						}
+					}		
+					if (c === 0 && j < 20) {
+						lastRow = j;
+						return map[j][i];
+					} else {
+						if ((j === 0 && i === 0) || (c === 0 && j === 20 && i === 0)) {
+							if ((lastRow % 2 === 0 && c % 2 !== 0) || (c === 0 && lastRow % 2 === 0)) {
+								val1 = map[17];
+								val2 = map[16];
+							} else {
+								val1 = map[16];
+								val2 = map[17];						
+							}
+						}
+						lastRow = j;
+						if (j % 2 === 0) {
+							return val1[i];
+						} else {
+							return val2[i];
+						}
+					}
+				}
+			})()
+		];
+		
+		levBg[0] = 'url(' + guySrc + ') no-repeat transparent 0 -61px';
+		levBg[1] = 'url(' + guySrc + ') no-repeat transparent -20px -61px';
+		levBg[2] = 'url(' + guySrc + ') no-repeat transparent -40px -61px';
+		levBg[3] = 'url(' + guySrc + ') no-repeat transparent -60px -61px';
+		levBg[4] = 'url(' + guySrc + ') no-repeat transparent -80px -62px';
+		
+		levBgHover[0] = 'url(' + guySrc + ') no-repeat transparent 0 -82px';
+		levBgHover[1] = 'url(' + guySrc + ') no-repeat transparent -40px -82px';
+		levBgHover[2] = 'url(' + guySrc + ') no-repeat transparent -80px -82px';
+		levBgHover[3] = 'url(' + guySrc + ') no-repeat transparent -120px -82px';
+		levBgHover[4] = 'url(' + guySrc + ') no-repeat transparent -160px -83px';
+	
+	function skiGuy(c, bool) {
+		//hat
+		c.fillStyle = 'red';
+		c.fillRect(23, 1, 3, 2);
+		c.fillRect(21, 3, 3, 1);
+		c.fillRect(20, 4, 4, 1);
+		c.fillRect(19, 5, 6, 1);
+		c.fillRect(18, 6, 8, 1);		
+		c.fillStyle = 'grey';
+		c.fillRect(18, 7, 9, 2);
+		
+		//head
+		c.fillStyle = '#ffcc66';
+		c.fillRect(17, 9, 9, 3);
+		
+		//eyes
+		c.strokeStyle = 'black';
+		c.beginPath();
+		c.moveTo(19, 10);
+		c.lineTo(21, 10);
+		c.moveTo(23, 10);
+		c.lineTo(25, 10);
+		c.stroke();
+		
+		//body
+		c.fillStyle = 'blue';
+		c.fillRect(16, 12, 11, 2);
+		c.fillRect(14, 14, 15, 5);
+		c.strokeStyle = 'grey';
+		c.beginPath();
+		c.moveTo(21, 12);
+		c.lineTo(21, 19);
+		c.stroke();
+		
+		//legs
+		c.fillStyle = 'green';
+		if (bool === undefined) {
+			c.fillRect(16, 19, 5, 4);
+			c.fillRect(23, 19, 5, 4);
+			c.fillStyle = 'cyan';
+			c.fillRect(16, 23, 5, 1);
+			c.fillRect(23, 23, 5, 1);
+		} else if (bool === 1) {
+			//left
+			c.fillStyle = 'green';
+			c.beginPath();
+			c.moveTo(16, 19);
+			c.lineTo(15, 22);
+			c.lineTo(19, 22);
+			c.lineTo(20, 19);
+			c.closePath();
+			c.stroke();
+			c.fill();
+			//right
+			c.fillStyle = 'green';
+			c.beginPath();
+			c.moveTo(23, 19);
+			c.lineTo(22, 22);
+			c.lineTo(26, 22);
+			c.lineTo(27, 19);
+			c.closePath();
+			c.stroke();
+			c.fill();
+			
+			c.fillStyle = 'cyan';
+			c.fillRect(15, 23, 5, 1);	
+			c.fillRect(22, 23, 5, 1);
+		} else if (bool === 2) {
+			//left
+			c.fillStyle = 'green';
+			c.beginPath();
+			c.moveTo(16, 19);
+			c.lineTo(17, 22);
+			c.lineTo(21, 22);
+			c.lineTo(20, 19);
+			c.closePath();
+			c.stroke();
+			c.fill();
+			//right
+			c.fillStyle = 'green';
+			c.beginPath();
+			c.moveTo(23, 19);
+			c.lineTo(24, 22);
+			c.lineTo(28, 22);
+			c.lineTo(27, 19);
+			c.closePath();
+			c.stroke();
+			c.fill();
+			
+			c.fillStyle = 'cyan';
+			c.fillRect(17, 23, 5, 1);	
+			c.fillRect(24, 23, 5, 1);
+		}
+		
+		//left
+		//arms
+		c.save();
+		c.translate(-5, 8);
+		c.rotate(Math.PI/180 * 335);
+		
+		c.fillStyle = 'blue';
+		c.fillRect(10, 14, 4, 3);
+		
+		//hands
+		c.fillStyle = 'red';
+		c.fillRect(8, 14, 2, 2);
+		
+		//poles
+		c.strokeStyle = '#999';
+		c.lineWidth = 1;
+		c.beginPath();
+		c.moveTo(8, 16);
+		c.lineTo(2, 23);
+		c.moveTo(2, 20);
+		c.lineTo(5, 23);
+		c.stroke();	
+		
+		//right
+		//arms
+		c.restore();
+		c.translate(9, -10);
+		c.rotate(Math.PI/180 * 25);
+		
+		c.fillStyle = 'blue';
+		c.fillRect(29, 14, 4, 3);
+		
+		//hands
+		c.fillStyle = 'red';
+		c.fillRect(33, 14, 2, 2);
+		
+		//poles
+		c.strokeStyle = '#999';
+		c.lineWidth = 1;
+		c.beginPath();
+		c.moveTo(35, 16);
+		c.lineTo(41, 23);
+		c.moveTo(41, 20);
+		c.lineTo(38, 23);
+		c.stroke();			
+	}
+	
+	function skis(c, bool) {
+		c.fillStyle = 'orange';
+		
+		if (bool === undefined) {
+			c.fillRect(17, 14, 3, 16);
+			c.fillRect(24, 14, 3, 16);
+			c.fillRect(18, 30, 1, 1);
+			c.fillRect(25, 30, 1, 1);
+		} else if (bool === 0) {
+			c.translate(-8, 22);
+			c.rotate(Math.PI/180 * 315);
+			c.fillRect(17, 14, 3, 16);
+			c.fillRect(18, 30, 1, 1);
+			c.translate(42, -2);
+			c.rotate(Math.PI/180 * 90);
+			c.fillRect(24, 14, 3, 16);		
+			c.fillRect(25, 30, 1, 1);	
+		} else if (bool === 1) {
+			c.translate(-2, -12);
+			c.fillRect(17, 14, 3, 16);
+			c.fillRect(18, 30, 1, 1);
+			c.translate(-1, 5);
+			c.fillRect(24, 14, 3, 16);
+			c.fillRect(25, 30, 1, 1);
+		} else if (bool === 2) {
+			c.translate(-9, -38);
+			c.fillRect(17, 14, 3, 16);
+			c.fillRect(18, 30, 1, 1);
+			c.translate(-1, -5);
+			c.fillRect(24, 14, 3, 16);
+			c.fillRect(25, 30, 1, 1);	
+		}
+	}	
+	
+	function board(c) {
+		c.lineWidth = 1;
+		c.fillStyle = 'purple'; 
+		c.lineJoin = 'round'; 
+		c.strokeStyle = 'purple'; 
+		c.fillRect(18, 7, 10, 16);
+	
+		c.beginPath();
+		c.moveTo(18, 23);
+		c.quadraticCurveTo(23, 30, 28, 23);
+		c.closePath();
+		c.stroke();
+		c.fill();
+	}
+	
+	function guy(c, left) {
+		c.fillStyle = 'orange';
+		c.save();
+		
+		//body
+		c.fillRect(15, 9, 16, 6);
+		
+		//head
+		c.lineWidth = 3;
+		c.fillStyle = 'white';
+		c.lineJoin = 'round';
+		c.strokeStyle = 'orange';
+		c.beginPath();
+		c.moveTo(18, 9);
+		c.quadraticCurveTo(23, 0, 28, 9);
+		c.stroke();
+		c.fill();
+		
+		//shades
+		c.lineWidth = 1;
+		c.strokeStyle = 'black';
+		c.moveTo(19, 7);
+		c.lineTo(25, 7);
+		c.stroke();
+		
+		if (!left) {
+			//left leg
+			c.fillStyle = 'blue';
+			c.fillRect(18, 15, 6, 3);
+			
+			//left boot
+			c.fillStyle = '#666';
+			c.fillRect(17, 18, 7, 1);
+			
+			//right leg
+			c.fillStyle = 'blue';
+			c.fillRect(22, 15, 6, 5);
+			
+			//right boot
+			c.fillStyle = '#666';
+			c.fillRect(21, 20, 7, 1);
+		} else {
+			//left leg
+			c.fillStyle = 'blue';
+			c.fillRect(22, 15, 6, 3);
+			
+			//left boot
+			c.fillStyle = '#666';
+			c.fillRect(21, 15, 7, 1);
+			
+			//right leg
+			c.fillStyle = 'blue';
+			c.fillRect(18, 15, 6, 5);
+			
+			//right boot
+			c.fillStyle = '#666';
+			c.fillRect(17, 20, 7, 1);
+		}
+
+		//left arm
+		c.fillStyle = 'orange';
+		c.translate(14, -8);
+		c.rotate(Math.PI/180 * 49);
+		c.fillRect(8, 9, 7, 3);
+		c.fillStyle = 'red';
+		c.strokeStyle = 'red';
+		c.beginPath();
+		c.moveTo(8, 8);
+		c.quadraticCurveTo(1, 11, 8, 13);
+		c.closePath();
+		c.stroke();
+		c.fill();
+		
+		c.restore();
+		
+		//right arm
+		c.translate(35, 28);
+		c.rotate(Math.PI/180 * 220);
+		c.fillRect(8, 9, 7, 3);		
+		c.fillStyle = 'red';
+		c.strokeStyle = 'red';
+		c.beginPath();
+		c.moveTo(8, 8);
+		c.quadraticCurveTo(1, 11, 8, 13);
+		c.closePath();
+		c.stroke();
+		c.fill();
+	}
+
+	function levels(c) {
+		//beginner
+		c.fillStyle = 'green';
+		c.beginPath();
+		c.arc(10, 10, 10, 0, Math.PI * 2, true);
+		c.fill();
+		
+		//int
+		c.fillStyle = 'blue';
+		c.fillRect(20, 0, 20, 20);
+		
+		//advanced
+		c.fillStyle = 'black';
+		c.beginPath();
+		c.moveTo(50, 0);
+		c.lineTo(60, 10);
+		c.lineTo(50, 20);
+		c.lineTo(40, 10);
+		c.closePath();
+		c.fill();
+		
+		//expert
+		c.beginPath();
+		c.moveTo(65, 0);
+		c.lineTo(70, 10);
+		c.lineTo(65, 20);
+		c.lineTo(60, 10);
+		c.closePath();
+		c.fill();
+		c.beginPath();
+		c.moveTo(75, 0);
+		c.lineTo(80, 10);
+		c.lineTo(75, 20);
+		c.lineTo(70, 10);
+		c.closePath();
+		c.fill();
+		
+		//random
+		c.font = "30px new times roman"
+		c.fillStyle = "#606";
+		c.fillText('?', 83, 21);
+	}	
+	
+	function drawGuy() {
+		try {
+			var canvas = document.getElementById('guyCanvas'); 
+			context = canvas.getContext('2d'); 
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			
+			//levels
+			context.restore();
+			context.save();
+			context.translate(0, 61);
+			levels(context);			
+
+			//levels hover			
+			context.restore();
+			context.save();
+			context.translate(0, 82);
+			context.scale(2, 2);
+			levels(context);
+			
+			//ski init
+			context.restore();
+			context.save();
+			context.translate(-4, 30);
+			skis(context);
+			skiGuy(context);
+			
+			//ski end
+			context.restore();
+			context.save();
+			context.translate(55, 76);
+			context.rotate(Math.PI/180 * 220);
+			skis(context, 0);
+			
+			context.restore();
+			context.save();
+			context.translate(55, 76);
+			context.rotate(Math.PI/180 * 220);
+			skiGuy(context);
+
+			//right
+			context.restore();
+			context.save();
+			context.translate(64, 60);
+			context.rotate(Math.PI/180 * 315);
+			skis(context, 1);
+			
+			context.restore();
+			context.save();
+			context.translate(64, 30);
+			skiGuy(context, 1);
+			
+			//left
+			context.restore();
+			context.save();
+			context.translate(98, 60);
+			context.rotate(Math.PI/180 * 45);
+			skis(context, 2);
+
+			context.restore();
+			context.save();
+			context.translate(98, 30);
+			skiGuy(context, 2);			
+	
+			//init
+			context.restore();
+			context.save();	
+			context.translate(-7, 0);
+			board(context); 
+			guy(context);
+			
+			//end
+			context.restore();
+			context.save();
+			context.translate(76, 20);//15
+			context.rotate(Math.PI/180 * 150);
+			board(context);
+			guy(context);
+
+			//right
+			context.restore();
+			context.save();
+			context.translate(56, 25);
+			context.rotate(Math.PI/180 * 315);
+			board(context);
+			
+			context.restore();
+			context.save();
+			context.translate(60, 0);
+			guy(context);			
+			
+			//left
+			context.restore();
+			context.save();
+			context.translate(111, -8);
+			context.rotate(Math.PI/180 * 45);
+			board(context);
+			
+			context.restore();
+			context.save();
+			context.translate(93, 0);
+			guy(context, true);
+			
+			return canvas;
+		} catch(e) {
+			return null;
+		}
+	}		
+	
+	function tree(c) {
+    c.beginPath(); 
+		c.moveTo(30, 3);
+		c.lineTo(20, 20);
+		c.lineTo(25, 20);
+    c.lineTo(15, 40);
+    c.lineTo(20, 40);
+    c.lineTo(10, 60);
+    c.lineTo(15, 60);
+    c.lineTo(5, 78);
+    c.lineTo(55, 78);
+    c.lineTo(45, 60);
+    c.lineTo(50, 60);
+    c.lineTo(40, 40);
+    c.lineTo(45, 40);
+    c.lineTo(35, 20);
+    c.lineTo(40, 20);
+    c.closePath();
+	}
+	
+	function snow(c) {
+		c.fillStyle = 'white';
+    c.beginPath(); 
+		c.moveTo(30, 3);
+		c.lineTo(25, 10);
+		c.quadraticCurveTo(28, 12, 30, 10);
+		c.quadraticCurveTo(34, 16, 37, 13);
+		c.closePath();
+		c.fill();
+
+		c.beginPath();
+		c.moveTo(25, 20);
+		c.lineTo(21, 29);
+		c.quadraticCurveTo(26, 28, 30, 25);
+		c.quadraticCurveTo(34, 33, 36, 30);
+		c.quadraticCurveTo(38, 36, 42, 33);
+		c.lineTo(38, 25);
+		c.quadraticCurveTo(30, 26, 25, 20);
+		c.closePath();
+		c.fill();
+		
+		c.beginPath();
+		c.moveTo(20, 40);
+		c.lineTo(15, 50);
+		c.quadraticCurveTo(30, 55, 33, 48);
+		c.quadraticCurveTo(36, 60, 40, 46);
+		c.quadraticCurveTo(43, 62, 49, 58);
+		c.lineTo(41, 42);
+		c.quadraticCurveTo(38, 48, 30, 40);
+		c.quadraticCurveTo(26, 45, 20, 40);
+		c.closePath();
+		c.fill();
+		
+		c.beginPath();
+		c.moveTo(15, 60);
+		c.lineTo(12, 65);
+		c.quadraticCurveTo(15, 68, 18, 64);
+		c.quadraticCurveTo(23, 72, 26, 68);
+		c.quadraticCurveTo(28, 77, 30, 66);
+		c.quadraticCurveTo(33, 68, 38, 65);
+		c.quadraticCurveTo(50, 78, 55, 76);
+		c.lineTo(47, 63);
+		c.quadraticCurveTo(33, 65, 26, 61);
+		c.quadraticCurveTo(20, 68, 15, 60);
+		c.closePath();
+		c.fill();
+	}
+
+	function drawTree() {
+		try {
+			var canvas = document.getElementById('myCanvas'); 
+			context = canvas.getContext('2d'); 
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.save();  
+			tree(context); 
+			context.lineWidth = 3;
+			context.lineJoin = 'round'; 
+			context.strokeStyle = 'cyan';
+			//context.strokeStyle = '#099';
+			context.stroke(); 
+			context.fillStyle = 'darkgreen'; 
+			context.fill(); 	
+
+      context.translate(13.8, 1);
+      context.scale(0.6, 0.98);
+      context.lineWidth = 0;
+      tree(context);     
+			context.fillStyle = '#003333'; 
+			context.fill(); 	
+      
+			//context.restore();
+			//snow(context); 
+	
+			
+			return canvas;
+
+		} catch(e) {
+			return null;
+		}
+	}		
+	
+	function getImg(callback) {
+		var canvas = callback.apply(ski);
+		if (canvas !== null) {
+			var someImg = new Image();
+			someImg.src = canvas.toDataURL("image/png");
+			return someImg.src;
+		} else {
+			return '';
+		}
+	}
+	
+	function Tree(row, indx, os) {
+		this.id = 't' + row + '_' + indx;	
+		this.left = this.getLeft(indx, os);
+		this.width = this.getWidth(indx, os);
+	}
+	
+	Tree.prototype.drawTree = function() {
+		var tmpl = '<div id="' + this.id + '" class="tree">' +
+				'<div class="leaves" ' + treeStyle + '></div>' +
+				'<div class="trunk"></div>' +
+			'</div>';
+		return tmpl;
+	}
+	
+	Tree.prototype.getLeft = function(i, os) {
+		var l = ((i + 1) * 60) - 40;
+		return l + os;
+	}
+	
+	Tree.prototype.getWidth = function(i, os) {
+		var w = ((i + 1) * 60) - 20;
+		return w + os;
+	}
+
+	function createTree(j, alg, cnt) {
+		var d,
+			str = '',
+			os = 0,
+			osStyle = '';
+			
+		treeCoord[j] = [];
+			
+		for (var i = 0; i < 10; i++) {
+			d = algAry[alg](i, j, cnt);
+			if (d) {		
+				var t = new Tree(j, i, os);
+				str += t.drawTree();
+				treeCoord[j].push([t.left, t.width]);
+			} else {
+				if (i === 0) {
+					os = -30;
+					osStyle = ' style="width: 30px"';
+				} else {
+					osStyle = '';
+				}
+				str += '<div id="p' + j + '_' + i + '" class="path"' + osStyle + '></div>';		
+			}
+		}	
+		return str;	
+	}
+
+	function initTree(num, alg) {
+		var str = '';
+		
+		for (var j = 0, max = num; j < max; j++) {
+			str += '<div id="row' + j + '" class="row" style="z-index: 300">';
+			str += createTree(j, alg, 0);
+			str += '</div>';
+		}
+		$('#soil').html(str);
+	}
+	
+	function initGuy() {
+		if (guySrc !== '') {
+			$('#guy').css('background', initGuyBg);
+		}
+	}
+	
+	function isCollide(row) {
+		var guyLeft = $('#guy').position().left,
+			guyWidth = guyLeft + guyMaxWidth,
+			tree = treeCoord[row];
+		
+		for (var i = tree.length; i--;) {
+			var treeLeft = tree[i][0],
+				treeWidth = tree[i][1];
+			if(!((guyWidth < treeLeft) || (guyLeft > treeWidth))) {
+				return true;
+			}
+		}	
+		return false;
+	}
+	
+	function stopMoving(num) {
+		$('#row' + num).stop(true, false);
+
+		for (var i = timer.length; i--;) {
+			$('#row' + i).stop(true, false);
+			clearTimeout(timer[i]);
+		}
+		
+		if (timerZ) {
+			clearInterval(timerZ);
+		}
+		stopped = true;
+		$('#guy').css('top', ($('#row' + num).position().top + 57) + 'px').css('background', endGuyBg);
+		$('.container, .menu').show();
+	}
+	
+	function initScene() {
+		$('#snow').css('top', '193px');
+	}
+	
+	function animateBg() {
+		var decr = '-=163px',
+			dur = duration;
+		
+		$('#snow').animate({ top: decr },
+		{
+			duration: dur,
+			complete: function() {
+				animate(levAry);
+			}	
+		});
+	}
+	
+	function animate(ary) {
+		if (ary.length) {
+			var val = ary.pop(),
+				rows = val[0],
+				times = val[1],
+				alg = val[2],
+				bool = true,
+				decr = '-=410px',
+				dur = duration * 1.5,
+				delay = dur/rows,
+				counter = 1,
+				lastRow = rows - 1;
+				
+			function treeAnimation() {
+				for (var i = rows; i--;) {
+					var rowId = '#row' + i,
+						wait = delay * i;
+					(function(i, rowId, wait, bool, alg) {
+						timer[i] = setTimeout(function() {
+							$(rowId).animate({ top: decr }, 
+							{
+								duration: dur, 
+								step: function(n, fx) {
+									if (n < 116 && bool) {
+										bool = false;
+										if (isCollide(i)) {
+											stopMoving(i);		
+										}	
+									}
+								},
+								complete: function() {
+									//console.log(counter);
+									
+									if (counter !== times) {
+										$(rowId).html(createTree(i, alg, counter));
+										$(rowId).css({
+											top: '350px',
+											zIndex: '+=1'
+										});
+									}
+									bool = true;
+									
+									if (i === lastRow) {
+										counter++;
+										if (counter === times) {
+											clearInterval(timerZ);
+											setTimeout(function() {
+												if (ary.length && !stopped) {
+													animate(ary);
+												} else {
+													$('.container, .menu').show();
+												}
+											}, dur);
+										} else if (times < 2) {
+											if (ary.length && !stopped) {
+												animate(ary);
+											} else {
+												$('.container, .menu').show();
+											}
+										}
+									}
+								}
+							});	
+						}, wait);
+					})(i, rowId, wait, bool, alg);		
+				}
+			}
+			
+			initTree(rows, alg, counter);
+			
+			treeAnimation();
+			
+			if (times > 1) {
+				timerZ = setInterval(treeAnimation, dur);
+			}
+		
+		}
+	}
+
+	function isLBorder(a) {
+		var left = a.position().left;
+		return !(left > 5);
+	}	
+	
+	function isRBorder(a) {
+		var left = a.position().left,
+			width = a.width();
+		return !((left + width)  < 595);	
+	}
+	
+	function events() {
+		var t;
+		
+		$('html').keydown(function(e) {
+			var id = e.keyCode,
+				obj = $('#guy');
+			
+			//console.log(e.keyCode);
+			if (!isLBorder(obj) && (id === 74 || id === 37)) {
+				clearInterval(t);
+				t = setInterval(function() {
+					$('#guy').css('left', '-=3px');
+					if (isLBorder(obj)) {
+						clearInterval(t);
+					}
+				}, 10);
+				if (!stopped) {
+					$('#guy').css('background', leftGuyBg);
+				}
+			} else if (!isRBorder(obj) && (id === 75 || id === 39)) {
+				clearInterval(t);
+				t = setInterval(function() {
+					$('#guy').css('left', '+=3px');
+					if (isRBorder(obj)) {
+						clearInterval(t);
+					}
+				}, 10);
+				if (!stopped) {
+					$('#guy').css('background', rightGuyBg);
+				}
+			} else if (menuClicked && (id === 40 || id === 76)) {
+				stopped = false;
+				menuClicked = false;
+				console.log('doh');
+				animateBg();
+			} else {
+				clearInterval(t);
+			}
+		});
+		
+		$('html').keyup(function(e) {
+			var id = e.keyCode;
+			
+			if (id === 74 || id === 75 || id === 37 || id === 39) {
+				clearInterval(t);
+				if (!stopped) {
+					setTimeout(function() {
+						if (!stopped) {
+							$('#guy').css('background', initGuyBg);
+						}
+					}, 600);
+				}
+			} else {
+				clearInterval(t);
+			}
+		});
+		
+		$('#menu').on('click', '.menuLink', function(e) {
+			e.preventDefault();
+			var targId = e.target.id,
+				levClicked = false;
+				
+			trees = 10;						
+			clearInterval(t);
+			
+			if (targId === 'ride') {
+				treeStyle = 'style="background: url(' + leavesSrc + ') no-repeat transparent"';
+				initGuyBg = 'url(' + guySrc + ') no-repeat transparent';
+				endGuyBg = 'url(' + guySrc + ') no-repeat transparent -34px 0';
+				rightGuyBg = 'url(' + guySrc + ') no-repeat transparent -68px 0';
+				leftGuyBg = 'url(' + guySrc + ') no-repeat transparent -100px 0';
+				guyMaxWidth = 33;
+				$('#guy').css('width', '33px');
+			} else if (targId === 'ski') {
+				treeStyle = 'style="background: url(' + leavesSrc + ') no-repeat transparent"';
+				initGuyBg = 'url(' + guySrc + ') no-repeat transparent 0 -31px';
+				endGuyBg = 'url(' + guySrc + ') no-repeat transparent -35px -31px';
+				rightGuyBg = 'url(' + guySrc + ') no-repeat transparent -69px -31px';
+				leftGuyBg = 'url(' + guySrc + ') no-repeat transparent -103px -31px';
+				guyMaxWidth = 34;			
+				$('#guy').css('width', '34px');
+			} else if (targId === 'demo') {
+				treeStyle = '';
+				initGuyBg = '';
+				endGuyBg = 'red';
+				rightGuyBg = '';
+				leftGuyBg = '';
+			} else if (targId === 'green') {
+				levAry = [
+					[20, 3, 2],
+					[18, 6, 4],
+					[2, 8, 0]
+				];
+				levClicked = true;
+			} else if (targId === 'blue') {
+				levAry = [
+					[20, 3, 1],
+					[6, 2, 0],
+					[2, 6, 0]
+				];
+				levClicked = true;
+			} else if (targId === 'black') {
+				levAry = [
+					[12, 3, 3],
+					[7, 1, 0],
+					[5, 2, 0],
+					[3, 3, 0]				
+				];
+				levClicked = true;
+			} else if (targId === 'dBlack') {	
+				levAry = [
+					[20, 1, 4],
+					[trees, 2, 0],
+					[3, 1, 0]
+				];
+				levClicked = true;
+			} else if (targId === 'rand') {
+				var lev = Math.floor(Math.random() * 4) + 1;
+				levAry = [
+					[Math.floor(Math.random() * 30) + 1, Math.floor(Math.random() * 3) + 1, lev],
+					[Math.floor(Math.random() * 10) + 1, Math.floor(Math.random() * 3) + 1, 0],
+					[Math.floor(Math.random() * 10) + 1, Math.floor(Math.random() * 3) + 1, 0],
+					[Math.floor(Math.random() * 10) + 1, Math.floor(Math.random() * 3) + 1, 0]
+				];
+				levClicked = true;
+			}
+
+			if (levClicked) {
+				$('.container').css({
+					'width': '80px',
+					'height': '60px'
+				});
+				$('.menuItem:lt(2)').show();
+				$('.menuItem:gt(1)').hide();
+				$('.container, .menu').hide();
+				treeCoord = [];
+				//initTree(trees, 0);
+				$('#soil').html('');
+				initGuy();
+				initScene();
+				stopped = false;
+				menuClicked = true;
+			} else {
+				$('.container').animate({
+					width: '60px',
+					height: '160px'
+				}, 300, function() {
+					$('.menuItem:lt(2)').hide('slow');
+					$('.menuItem:gt(1)').show('slow');
+				});			
+			}
+		});
+		
+		$('#menu').on('mouseover', '.menuLink', function(e) {
+			var targId = e.target.id;
+		
+			if (targId !== 'ski' && targId !== 'ride') {
+				var ind = $('.menuLink:gt(1)').index(this);
+				
+				$(this).css({
+					background: levBgHover[ind],
+					width: '40px',
+					height: '40px'
+				});
+			}
+		
+		});
+		
+		$('#menu').on('mouseout mouseleave', '.menuLink', function(e) {
+			var targId = e.target.id;
+			
+			if (targId !== 'ski' && targId !== 'ride') {
+				var ind = $('.menuLink:gt(1)').index(this);
+				
+				$(this).css({
+					width: '20px',
+					height: '20px',
+					background: levBg[ind]
+				});
+			}
+		
+		});
+	}
+
+  function init() {
+		var dom = $('.menuItem:gt(1)');
+		dom.hide();
+		dom.children().each(function(i) {
+			$(this).html('').css({
+				background: levBg[i],
+				width: '20px',
+				height: '20px',
+				display: 'block'
+			});
+		});
+		initGuy();
+		events();
+  }
+  
+  return {
+		init: init
+  }
+	
+})();
+
+ski.init();
+</script>
+
+</body>
+</html>

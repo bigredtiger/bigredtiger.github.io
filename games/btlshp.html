@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Battleship</title>
+	<meta charset="utf-8" />
+
+<style>
+html {
+	width: 100%;
+	height: 100%;
+	}
+body {
+	background-color: #000;
+	color: #fff;
+	margin: 0;
+	padding: 20px;
+	box-sizing: border-box;
+	font-family: verdana, sans-serif;
+	font-size: 16px;
+	width: 100%;
+	height: 100%;
+	}
+#base {
+	text-align: left;
+	border: 1px solid #333;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	}
+.container {
+	float: left;
+	overflow: hidden;
+	margin: 30px 0 0 30px;
+	}
+#pStatus, #cStatus {
+	color: red;
+	margin-left: 5px;
+	height: 120px;
+	}
+.grid {
+	border-top: 6px black solid;
+	border-left: 6px black solid;
+	margin: 0;
+	}
+.gridCell {
+	border-right: 10px black solid;
+	border-bottom: 10px black solid;
+	width: 33px;
+	height: 33px;
+	}
+#cTable .gridCell {
+	cursor: pointer;
+	}
+.showBoat {
+	background-color: #333;
+	}
+.allClear {
+	background-color: cyan;
+	}
+.hit {
+	background-color: red;
+	}
+.miss {
+	background-color: #000066;
+	}
+.place {
+	background-color: purple;
+	}
+.finalMsg {
+  margin-top: 10px;
+	font-weight: bold;
+	font-size: 1.2em;
+  color: cyan;
+	}
+#menu {
+  margin: 5px 0 0 0;
+  padding: 0;
+  }
+.menuItem {
+  list-style-type: none;
+  padding-bottom: 10px;
+  }
+.menuLink, .menuLink:visited {
+  color: #fff;
+  text-decoration: none;
+  }
+.menuLink:hover, .menuLink:visited:hover {
+  color: cyan;
+  }  
+.menuLink:active, .menuLink:visited:active {
+  color: red;
+  }  
+.linkSelected, .linkSelected:visited,
+.linkSelected:hover, .linkSelected:visited:hover {
+	color: yellow;
+	}
+.darkness, .darkness:visited {
+	color: black;
+	}
+.selectable {
+	cursor: pointer;
+	}
+</style>  
+
+</head>
+<body>
+<div id="base">
+	<div class="container">
+		<div id="pTable"></div>
+		<div id="pStatus"></div>
+	</div>
+	<div class="container">
+		<div id="cTable"></div>
+		<div id="cStatus"></div>
+	</div>
+  <div class="container">
+    <ul id="menu">
+		<li class="menuItem"><a href="#" class="menuLink" id="random">Random Ships</a></li>
+		<li class="menuItem"><a href="#" class="menuLink" id="place">Place Ships</a></li>
+		<li class="menuItem"><a href="#" class="menuLink" id="cvc">Computer vs Computer</a></li>
+    </ul>
+  </div>
+</div>
+<!-- <script src="http://code.jquery.com/jquery-latest.js"></script> -->
+<script src="jquery-1.7.2.min.js"></script>
+<script>
+var btlshp = (function() {
+	var cB = [
+		[0, 1, 2, 0, 0, 0, 1, 0],
+		[0, 1, 0, 0, 0, 0, 1, 1],
+		[0, 1, 0, 0, 2, 0, 0, 1],
+		[1, 1, 1, 1, 1, 0, 2, 1],
+		[0, 0, 0, 0, 0, 2, 0, 1],
+		[0, 2, 0, 2, 2, 0, 0, 0],
+		[0, 2, 0, 2, 2, 0, 0, 0],
+		[0, 2, 0, 0, 0, 0, 0, 0]	
+	],
+	pB = [
+		[0, 1, 2, 0, 0, 0, 1, 0],
+		[0, 1, 0, 0, 0, 0, 1, 1],
+		[0, 1, 0, 0, 2, 0, 0, 1],
+		[1, 1, 1, 1, 1, 0, 2, 1],
+		[0, 0, 0, 0, 0, 2, 0, 1],
+		[0, 2, 0, 2, 2, 0, 0, 0],
+		[0, 2, 0, 2, 2, 0, 0, 0],
+		[0, 2, 0, 0, 0, 0, 0, 0]	
+	],		
+	hits = [
+		[null, null, 0, 0, 0, 0],
+		[null, null, 0, 0, 0, 0]
+	],
+	ships = [null, null, 'Destroyer', 'Submarine', 'Battleship', 'Aircraft Carrier'],
+  blink,
+	fire,
+	plan = [0, 0],
+	savedCoords = [[], []],
+	sX, sY,
+	oX, oY,
+	pClicks = 0,
+	placed = [null, null, 0, 0, 0, 0],
+	pFlag = false;
+	
+	function clearBoard(ary) {
+		for (var i = ary.length; i--;) {
+			for (var j = ary[i].length; j--;) {
+				ary[i][j] = 0;
+			}
+		}
+	}
+	
+	function drawBoard(ary) {
+		var whichCls,
+			pre = (ary === cB ? 'c' : 'p');
+			str = '<table id="' + pre + 'Grid" class="grid" cellspacing="0" cellpadding="0">';	
+		for (var y = 0, max = ary.length; y < max; y++) {
+			str += '<tr>';
+			for (var x = 0, max = ary[y].length; x < max; x++) {
+				switch(ary[x][y]) {
+					case 0:
+						whichCls = 'allClear';
+						break;
+					case 1:
+						whichCls = 'hit';
+						break;
+					case 2:
+						whichCls = 'miss';
+						break;
+					case 10:
+						whichCls = 'place';
+						break;
+					default:
+						if (ary === cB) {
+							whichCls = 'allClear';
+						} else {
+							whichCls = 'showBoat';
+						}
+				}
+				str += '<td class="gridCell ' + whichCls + '" id="c' + x + '-' + y + '">&nbsp;<td>';
+			}
+			str += '</tr>';
+		}
+		str += '</table>';
+		$('#' + pre + 'Table').html(str);
+	}
+	
+	function checkDamage(val, id) {
+		var shipLength = val,
+			h = hits[id],
+			hitCount = h[val];
+		if (id) {
+			var pre = 'c',
+				msg = 'YOU WIN!';
+		} else {
+			var pre = 'p',
+				msg = 'COMPUTER WINS!';
+				
+		}
+		if (hitCount === shipLength) {
+			$('#' + pre + 'Status').append('<div>' + ships[val] + ' sunk!</div>');
+			if (h[2] + h[3] + h[4] + h[5] === 14 && !blink) {
+				$('#' + pre + 'Status').append('<div class="finalMsg">' + msg + '</div>');
+        var tog = true;
+        blink = setInterval(function() {
+          if (tog) {
+            $('.finalMsg').addClass('darkness');
+						$('.linkSelected').addClass('darkness');
+            tog = false;
+          } else {
+            $('.finalMsg').removeClass('darkness');
+						$('.linkSelected').removeClass('darkness');
+            tog = true;
+          }
+        }, 600);
+				return 2;
+			}
+			return 1;
+		}
+		return 0;
+	}
+	
+	function placeShip(ary, shipNum, bool, x, y, d) {
+		var incr = 0,
+			rev = false;
+			
+		if (!bool) {
+			var x = Math.floor(Math.random() * 8);
+			var y = Math.floor(Math.random() * 8);
+			var d = Math.floor(Math.random() * 2);
+		}
+		
+		if (d) {
+			if (ary[x + (shipNum - 1)] === undefined) {
+				rev = true;
+			}
+		} else {
+			if (ary[y + (shipNum - 1)] === undefined) {
+				rev = true;
+			}
+		}
+		
+		var olx = x,
+			oly = y;
+		
+		do {
+			if (bool) {
+				ary[x][y] = shipNum * 10;
+			} else {
+				if (ary[x][y] > 10) {
+					break;
+				}
+			}
+			if (d) {
+				if (rev) {
+					x--;
+				} else {
+					x++;
+				}
+			} else {
+				if (rev) {
+					y--;
+				} else {
+					y++;
+				}
+			}
+			incr++;
+		} while (incr < shipNum);
+		
+		if (incr === shipNum && !bool) {
+			placeShip(ary, shipNum, 1, olx, oly, d);
+		} else if (incr < shipNum && !bool) {
+			placeShip(ary, shipNum, 0);
+		}
+		
+	}
+	
+	function events() {
+		$('#cGrid').live('click', function(e) {
+			var targ = e.target;
+			if (targ.id.indexOf('c') + 1 && !pFlag) {
+				var val = targ.id.split('-'),
+					i = parseInt(val[0].substring(1)),
+					j = parseInt(val[1]),
+					coord = cB[i][j],
+					val = coord / 10;
+				if (coord !== 2 && coord !== 1) {
+					if (coord === 0) {
+						cB[i][j] = 2;
+					} else if (coord > 10) {
+						cB[i][j] = 1;
+						hits[1][val]++;
+					}
+					drawBoard(cB);
+					checkDamage(val, 1);
+					if (!blink) {
+						autoFire(pB, 0, 0);
+					}
+				}
+			}
+		});
+    
+    $('#menu').live('click', function(e) {
+      var targ = e.target;
+			$('#menu a').removeClass('linkSelected darkness');
+      if (targ.id === 'random') {
+				pFlag = false;
+				$('#' + targ.id).addClass('linkSelected');
+				$('#pGrid').die('click');
+        initGame();
+        for (var i = 2; i < 6; i++) {
+          placeShip(pB, i, 0);
+          placeShip(cB, i, 0);
+        }
+        drawBoard(pB);
+        drawBoard(cB);
+      } else if (targ.id === 'place') {
+				pFlag = true;
+				$('#' + targ.id).addClass('linkSelected');
+				initGame();
+				drawBoard(pB);	
+				drawBoard(cB); 
+				$('#pTable .gridCell').addClass('selectable');
+				activatePboard();
+      } else if (targ.id === 'cvc') {
+				pFlag = false;
+				$('#pGrid').die('click');
+        initGame();
+        for (var i = 2; i < 6; i++) {
+          placeShip(pB, i, 0);
+          placeShip(cB, i, 0);
+        }
+        drawBoard(pB);
+        drawBoard(cB);
+				autoFire(cB, 1, 1);
+			}
+    });
+	}
+	
+	function validate() {
+		var cnt = 0;
+		for (var i = placed.length; i--;) {
+			if (placed[i] === 0) {
+				cnt = cnt + isSane(i);
+			}
+		}
+		if (cnt === 0) {
+			pB[oX][oY] = 0;
+			pB[sX][sY] = 0;
+			drawBoard(pB);
+			pClicks = 0;
+			//return false;
+		} else {
+			//return true;
+		}
+	}
+	
+	function isSane(len) {
+		var cnt = 0,
+			len = len - 2,
+			savedX = sX,
+			savedY = sY;
+		for (var i = len; i--;) {
+			//if (	
+					if (sX === oX && sY > oY && (sY + len) < pB.length && pB[sX][++savedY] === 0) {
+						cnt++;
+					} else if (sX === oX && sY < oY && (sY - len) >= 0 && pB[sX][--savedY] === 0) {
+						cnt++;
+					} else if (sY === oY && sX > oX && (sX + len) < pB.length && pB[++savedX][sY] === 0) {
+						cnt++;
+					} else if (sY === oY && sX < oX && (sX - len) >= 0 && pB[--savedX][sY] === 0) {
+						cnt++;
+					}	
+			//	) {
+			//	cnt++;
+			//}
+		}
+		if (cnt === len) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	
+	function checkShipsAhoy() {
+		var cnt = 0, len;
+		for (var i = placed.length; i--;) {
+			if (placed[i] === 0) {
+				len = i;
+				cnt++;
+			}
+		}
+	
+		if (cnt === 1) {
+			if (len > 2) {
+				if (isSane(len)) {
+					for (var i = (len - 1); i--;) {
+						if (sX === oX) {
+							if (sY > oY) {
+								pB[sX][sY++] = 10;
+							} else {
+								pB[sX][sY--] = 10;
+							}
+						} else if (sY === oY) {
+							if (sX > oX) {
+								pB[sX++][sY] = 10;
+							} else {
+								pB[sX--][sY] = 10;
+							}			
+						}
+					}
+				} else {
+					pB[oX][oY] = 0;
+					pB[sX][sY] = 0;
+					placeShip(pB, len, 0);
+				}
+			}
+			pClicks = len;
+			$('#pGrid').die('click');
+			activateShip();
+			drawBoard(pB);
+      for (var i = 2; i < 6; i++) {
+        placeShip(cB, i, 0);
+      }
+			setTimeout(function() {
+				$('#pStatus').html('');
+			}, 3000);
+			pFlag = false;
+		}
+	}
+	
+	function pPlace(x, y) {
+		pB[x][y] = 10;
+		if (pClicks === 0) {
+			oX = x;
+			oY = y;
+		}
+		sX = x;
+		sY = y;
+		pClicks++;
+		drawBoard(pB);
+		$('#pTable .gridCell').addClass('selectable');
+	}
+	
+	function activateShip() {
+		$('#pStatus').append('<div>' + ships[pClicks] + ' placed.</div>');
+		placed[pClicks] = pClicks;
+		for (var i = pB.length; i--;) {
+			for (var j = pB[i].length; j--;) {
+				if (pB[i][j] === 10) {
+					pB[i][j] *= pClicks;
+				}
+			}
+		}
+		
+	}
+	
+	function activatePboard() {
+		$('#pGrid').live('click', function(e) {
+			var targ = e.target,
+				val = targ.id.split('-'),
+				x = parseInt(val[0].substring(1)),
+				y = parseInt(val[1]),
+				coord = pB[x][y],
+				val = coord / 10;
+			
+			if (coord === 0) {
+				if (
+						(pClicks === 0) ||
+						(
+							pClicks === 1 && (sX === x || sY === y) && 
+							(x === (sX + 1) || x === (sX - 1) || y === (sY + 1) || y === (sY - 1)) 
+						)
+					) {
+					pPlace(x, y);
+					if (pClicks === 2) {
+						validate();
+						checkShipsAhoy();
+					}
+				} else if (pClicks > 1) {
+			
+					if ((oX === sX && sX === x && (y === (sY + 1) || y === (sY - 1))) ||
+							(oY === sY && sY === y && (x === (sX + 1) || x === (sX - 1))) ) {
+						if (pClicks < 5) {
+							pPlace(x, y);
+						} else {
+							if (placed[pClicks] === 0) {
+								activateShip();
+								pClicks = 0;
+								pPlace(x, y);
+							}
+						}
+					} else {
+						if (placed[pClicks] === 0) {
+							activateShip();
+							pClicks = 0;
+							pPlace(x, y);
+						}
+					}
+					
+				}
+			}	
+		});
+	}
+	
+	function initGame() {
+    clearInterval(blink);
+		clearInterval(fire);
+    initVars();
+    clearBoard(pB);
+    clearBoard(cB);
+    clearStatus();	
+	}
+	
+  function initVars() {
+    hits = [
+      [null, null, 0, 0, 0, 0],
+      [null, null, 0, 0, 0, 0]
+    ];
+    plan = [0, 0];
+    savedCoords[0].length = 0;
+	savedCoords[1].length = 0;
+    blink = 0;
+		pClicks = 0;
+		placed = [null, null, 0, 0, 0, 0];
+  }
+  
+  function clearStatus() {
+    $('#pStatus').html('');
+    $('#cStatus').html('');
+  }
+  
+	function autoFire(ary, bool, id) {
+		var x, y, val,
+			max = ary.length,
+			pMax = savedCoords[id].length;
+		
+		if (plan[id] !== 0) {
+			var	nCoord,
+				oX = savedCoords[id][1],
+				oY = savedCoords[id][4],
+				loopAgain;
+			
+			do {
+				if (plan[id] % 2 === 0) {
+					nCoord = savedCoords[id][plan[id]] - 1;
+				} else {
+					nCoord = savedCoords[id][plan[id]] + 1;
+				}
+				
+				if (plan[id] === 1 || plan[id] === 2) {
+					x = nCoord;
+					y = oY;	
+				} else {
+					x = oX;
+					y = nCoord;
+				}			
+				
+				if (nCoord >= 0 && nCoord < max && ary[x][y] !== 1 && ary[x][y] !== 2) {
+					loopAgain = false;
+				} else {
+					loopAgain = true;
+					plan[id]++;
+				}
+			} while (loopAgain && plan[id] < pMax);		
+		}
+		
+		if (plan[id] >= pMax) {
+			plan[id] = 0;
+		}
+		
+		if (plan[id] === 0) {
+			do {
+				x = Math.floor(Math.random() * max);
+				y = Math.floor(Math.random() * max);
+			} while (ary[x][y] === 1 || ary[x][y] === 2);
+		}
+
+		var coord = ary[x][y];
+		val = coord / 10;
+		if (coord === 0) {
+			ary[x][y] = 2;
+			if (plan[id] !== 0) {
+				plan[id]++;
+			}
+		} else {
+			ary[x][y] = 1;
+			hits[id][val]++;
+			if (plan[id] === 0) {
+				savedCoords[id][1] = x;
+				savedCoords[id][2] = x;
+				savedCoords[id][3] = y;
+				savedCoords[id][4] = y;
+				plan[id]++;
+			} else {
+				savedCoords[id][plan[id]] = nCoord;
+			}
+		}
+		drawBoard(ary);
+		
+		var check = checkDamage(val, id);
+		
+		if (check === 1) {
+			plan[id] = 0;
+		}
+		if (bool) {
+			if (check !== 2) {
+				if (id) {
+					id = 0;
+					ary = pB;
+				} else {
+					id = 1;
+					ary = cB;
+				}
+				fire = setTimeout(function() {
+					autoFire(ary, bool, id);
+				}, 0);
+			}
+		}
+	}
+
+  function init() {
+		events();
+		$('#place').trigger('click');
+  }
+  
+  return {
+		init: init
+  }
+	
+})();
+
+btlshp.init();
+</script>
+
+</body>
+</html>

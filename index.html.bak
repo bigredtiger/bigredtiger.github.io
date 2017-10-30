@@ -22,7 +22,7 @@
 	<h1>BigRedTiger.com</h1>
 	<h2>Simon Wong :: BigRedTiger.com</h2>
 </header>
-<nav id="mainNav"></nav>
+<nav></nav>
 <article id="homePage">
 	<section id="splashBox">
 		<div id="pic"></div>

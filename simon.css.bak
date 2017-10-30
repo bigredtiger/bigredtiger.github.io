@@ -1,0 +1,270 @@
+body {
+	background-color: #000000;	
+	font-family: verdana, sans-serif;
+	font-size: 12px;
+	color: #ffffff;
+	overflow: hidden;
+	margin: 0;
+	}	
+a, a:visited {	
+	color: #888888;
+	text-decoration:none;		
+	}	
+a:hover, a:visited:hover {	
+	color: #ffffff;
+	}	
+header {
+	font-family: arial;
+	position: relative;
+	top: -28px;
+	}	
+article {
+	float: left;
+	clear: left;
+	width: 100%;
+	}
+h1 {
+	margin: 0;
+	font-size: 6em;
+	color: #000000;
+	letter-spacing: 8px;
+	}
+h2 {	
+	font-size: .1em;
+	margin: 0;
+	color: #000000;
+	}	
+footer {	
+	white-space: nowrap;
+	position: absolute;
+	bottom: 6px;
+	left: 7px;
+	font-size: .6em;
+	color: #222222;
+	letter-spacing: 3px;
+	}
+#photosPage, #resumePage, #gamesPage {
+	display: none;
+	}
+#photoBox, #resumeBox {	
+	float: left;
+	margin-left: 20px;
+	width: 66%;
+	}
+
+/* index.html */
+
+#splashBox {
+	float: left;
+	width: 484px;
+	}
+#quoteBox {
+	float: left;
+	width: 33%;
+	font-family: times, serif;
+	}
+#pic {
+	float: left;
+	width: 464px;
+	height: 312px;
+	background: url(images/splash4.jpg) no-repeat;
+	}
+#quote {
+	margin: 0;
+	font-size: 2em;
+	text-align: justify;
+	}
+#quote:first-letter {
+	font-size: 2.2em;
+	color: violet;
+	}
+#auth {
+	font-size: 1.8em;
+	color: purple;
+	font-weight: bold;
+	}
+#caption {
+	margin: 0 0 0 3px;
+	float: left;
+	clear: left;
+	width: 261px;
+	color: #dddddd;
+	}		
+#contact {
+	margin: 0;
+	float: left;
+	width: 200px;
+	text-align: right;
+	}
+
+/* photos.html */
+
+#counter {
+	margin: 0 0 1px 0;
+	}
+#myImg {
+	float: left;
+	margin-right: 20px;
+	cursor: pointer;
+	}
+#desc {
+	margin-top: 0;
+	}
+#photoNav {
+	position: absolute;
+	bottom: 30px;
+	right: 0;
+	}
+#photoNav ul {
+	margin: 0;
+	list-style: none;
+	}
+#photoNav li {
+	float: left;
+	padding: 0;
+	/*margin-left: 6px;*/
+	}
+#prevLink, #playLink, #pauseLink, #nextLink {
+	margin-right: 10px;
+	padding: 20px 60px;
+	background-color: #111;
+	border-radius: 3px;
+	}
+#pauseEl {
+	display: none;
+	}
+	
+#left {
+	position: absolute;
+	display: block;
+	}
+	
+/* resumes.html */
+
+#myPic {
+	 float:left;
+	 margin-right:20px;
+	 width: 130px;
+	 height: 162px;
+	 background: url(images/simonw.jpg) no-repeat;
+	 }
+#resumePage .links ul {	
+	margin: 0;
+	list-style: none;
+	}	
+	
+/* games.html */
+
+#gameCube {
+	padding: 0;
+	list-style: none;
+	margin: 0;
+	}
+.cat {
+	clear: left;
+	}
+.catName {
+	margin-left: 60px;
+	font-size: 1.1em;
+	color: cyan;
+	text-transform: lowercase;
+	}
+#gamesPage .links {
+	margin: 0 20px;
+	padding: 0;
+	overflow: hidden;
+	}
+.gameBox {
+	margin: 10px 20px;
+	padding: 0;
+	overflow: hidden;
+	list-style: none;
+	}
+.gameLink {
+	float: left;
+	background-color: violet;
+	width: 80px;
+	height: 80px;
+	margin: 0 10px 10px 0;
+	padding: 10px;
+	color: #000;
+	font-size: 1.28em;
+	}
+.gameLink:visited, .gameLink:hover, .gameLink:visited:hover {
+	color: #000;
+	}
+.gameLink.desc {
+	background-color: #333;
+}
+.gameLink .gameTitle {
+	display: block;
+}
+.gameLink .gameDesc {
+	display: none;
+}
+.gameLink.desc .gameTitle {
+	display: none;
+}
+.gameLink.desc .gameDesc {
+	display: block;
+	font-size: .66em;
+	text-align: justify;
+	color: cyan;
+}
+	
+/* menu */	
+	
+nav {
+	float: right;
+	position: absolute;
+	right: 20px;
+	z-index: 100;
+	}
+nav ul {
+	margin: 0;
+	padding: 0;
+	}
+nav li {
+	margin: 0;
+	padding: 0 0 10px 0;
+	list-style-type: none;
+	}	
+.home, .photos, .resume, .games,
+.home_g, .photos_g, .resume_g, .games_g {
+	display: block;	
+	background: url(images/menu_sprite.png) no-repeat;
+	}
+.home, .home_g {
+	width: 30px;
+	height: 25px;	
+	background-position: 0 -25px;
+	}	
+.home:hover, .home_g {	
+	background-position: 0 0;
+	}	
+.photos, .photos_g {
+	width: 30px;
+	height: 43px;
+	background-position: -30px -43px;
+	}
+.photos:hover, .photos_g {
+	background-position: -30px 0;
+	}	
+.resume, .resume_g {
+	width: 20px;
+	height: 38px;
+	background-position:-60px -38px;
+	margin-left: 10px;
+	}		
+.resume:hover, .resume_g {
+	background-position: -60px 0;
+	}	
+.games, .games_g {
+	width: 20px;
+	height: 38px;
+	background-position:-60px -38px;
+	margin-left: 10px;
+	}		
+.games:hover, .games_g {
+	background-position: -60px 0;
+	}

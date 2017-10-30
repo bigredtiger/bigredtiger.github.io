@@ -1,0 +1,770 @@
+<!doctype html>
+<html>
+<head>
+	<title>Mono</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+	<meta charset="utf-8">
+	<style>	
+	
+/* main */	
+		html { height: 100% }
+		body {
+			margin: 0;
+			background-color: #000;
+			font-family: verdana, sans-serif;
+			font-size: 13px;
+			color: #fff;
+			height: 100%;
+			}
+		#status {
+			overflow: auto;
+			height: 600px;
+			width: 370px;
+			height: 100%;
+			position: absolute;
+			}
+		#summary {
+			padding-top: 10px;
+			margin-left: 380px;
+			height: 200px;
+			}
+		#board {
+			margin-left: 380px;
+			}
+
+/* states */			
+			
+		.loc {
+			color: white;
+			}
+		.buy {
+			color: green;
+			}
+		.rent {
+			color: orange;
+			}
+		.lose {
+			color: grey;
+			}
+		.win {
+			color: green;
+			}
+		.own {
+			color: white;
+			}
+
+/* table */
+
+		#pTable th {
+			padding: 1px 0;
+			width: 120px;
+			color: #000;
+			}
+		#pTable thead {
+			position: absolute;
+			}
+		#pTable tbody {
+			position: relative;
+			top: 20px;
+			overflow-y: scroll;
+			height: 160px;
+			display: block;
+			box-sizing: border-box;
+			}
+		#pTable td {
+			padding: 1px 0;
+			width: 120px;
+			}
+		.amount {
+			margin-left: 6px;
+			}
+
+/* board */
+
+		#gBoard {
+			height: 430px;
+			width: 360px;
+			}
+		.marker {
+			display: none;
+			}
+			
+	</style>
+</head>
+<body>
+	<section id="status"></section>
+	<section id="summary">
+		<section id="dataTable"></section>
+	</section>
+	<section id="board"></section>
+	
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script>
+		var mono = (function() {
+			var m = {
+				fac: 0,
+				maxW: 0,
+				maxH: 0,
+				boxWidth: 60,
+				boxHeight: 60,
+				loop: null,
+				curP: 0,
+				numPlayers: 3,
+				player: [
+					{
+						role: 'Thimble',
+						pos: 0,
+						wallet: 5000,
+						stat: 1,
+						color: 'yellow',
+						where: 0
+					},
+					{
+						role: 'Top Hat',
+						pos: 0,
+						wallet: 5000,
+						stat: 1,
+						color: 'purple',
+						where: 0
+					},
+					{
+						role: 'Shoe',
+						pos: 0,
+						wallet: 5000,
+						stat: 1,
+						color: 'red',
+						where: 0
+					},
+					{
+						role: 'Iron',
+						pos: 0,
+						wallet: 5000,
+						stat: 1,
+						color: 'cyan',
+						where: 0
+					}					
+				],
+				board: [
+					{
+						loc: 'Start',
+						val: 0,
+						color: 'yellow'
+					},
+					{
+						loc: 'Lenox Ave',
+						val: 25,
+						owner: -1,
+						rent: 2,
+						color: '#960'
+					},
+					{
+						loc: 'Washington Hts',
+						val: 50,
+						owner: -1,
+						rent: 5,
+						color: '#960'
+					},					
+					{
+						loc: 'Chance',
+						val: 1,
+						color: 'white'
+					},					
+					{
+						loc: 'Coney Island',
+						val: 100,
+						owner: -1,
+						rent: 10,
+						color: 'cyan'
+					},
+					{
+						loc: 'Flatbush Ave',
+						val: 125,
+						owner: -1,
+						rent: 12,
+						color: 'cyan'
+					},
+					{
+						loc: 'Bensonhurst',
+						val: 150,
+						owner: -1,
+						rent: 15,
+						color: 'cyan'
+					},					
+					{
+						loc: 'Chance',
+						val: 1,
+						color: 'white'
+					},
+					{
+						loc: 'Midwood',
+						val: 200,
+						owner: -1,
+						rent: 20,
+						color: 'purple'
+					},
+					{
+						loc: 'Ocean Parkway',
+						val: 220,
+						owner: -1,
+						rent: 22,
+						color: 'purple'
+					},
+					{
+						loc: 'Williamsburg',
+						val: 250,
+						owner: -1,
+						rent: 25,
+						color: 'purple'
+					},
+					{
+						loc: 'Free Parking',
+						val: 2,
+						color: 'grey'
+					},
+					{
+						loc: 'Battery Park',
+						val: 300,
+						owner: -1,
+						rent: 30,
+						color: 'orange'
+					},
+					{
+						loc: 'Gramercy',
+						val: 325,
+						owner: -1,
+						rent: 32,
+						color: 'orange'
+					},					
+					{
+						loc: 'Greenwich Village',
+						val: 350,
+						owner: -1,
+						rent: 35,
+						color: 'orange'
+					},
+					{
+						loc: 'Chance',
+						val: 1,
+						color: 'white'
+					},
+					{
+						loc: 'Madison Ave',
+						val: 400,
+						owner: -1,
+						rent: 40,
+						color: 'red'
+					},
+					{
+						loc: 'Midtown',
+						val: 425,
+						owner: -1,
+						rent: 42,
+						color: 'red'
+					},					
+					{
+						loc: 'Fifth Ave',
+						val: 450,
+						owner: -1,
+						rent: 45,
+						color: 'red'
+					},
+					{
+						loc: 'Chance',
+						val: 1,
+						color: 'white'
+					},					
+					{
+						loc: 'Columbus Circle',
+						val: 500,
+						owner: -1,
+						rent: 50,
+						color: 'blue'
+					},
+					{
+						loc: 'Park Ave',
+						val: 520,
+						owner: -1,
+						rent: 52,
+						color: 'blue'
+					}					
+				],
+				
+				setPosition: function(pIndex, pos) {
+					m.player[pIndex].pos = pos;
+				},
+				
+				updateProperties: function(dice) {
+					for (var i = 0, max = m.board.length; i < max; i++) {
+						if (m.board[i].owner === m.curP) {
+							m.board[i].owner = m.board[dice].owner;
+							v.updateSummary(m.board[i].loc, m.board[dice].owner, m.board[i].color);
+							v.showMarker(i, m.player[m.board[dice].owner].color);
+						}
+					}
+				}
+			};
+			
+			var v = {
+			
+				movePiece: function(indx, times, xy, func) {
+
+					var $p = $('#p' + indx), i,
+						w = m.boxWidth,
+						h = m.boxHeight,
+						move = w / 8, maxMove,
+						maxW, maxH, max;
+
+					switch(indx) {
+						case 0:
+							north = 3;
+							east = 3;
+							south = 1;
+							west = 1;
+							break;
+						case 1:
+							north = 1;
+							east = 3;
+							south = 3;
+							west = 1;
+							break;
+						case 2:
+							north = 3;
+							east = 1;
+							south = 1;
+							west = 3;
+							break;
+						case 3:
+							north = 1;
+							east = 1;
+							south = 3;
+							west = 3;
+							break;							
+					}
+					
+					if (xy < 2) {
+						maxW = (m.maxW * w) - ((w / 4) * north);
+						maxH = ((m.maxH + 2) * h) - ((w / 4) * east);
+					} else {
+						maxW = (w / 4) * south;
+						maxH = (w / 4) * west;
+					}
+						
+					switch(xy) {
+						case 0:
+						case 2:
+							a = 'cx';
+							max = maxW;
+							break;
+						case 1:
+						case 3:
+							a = 'cy';
+							max = maxH;
+					}
+						
+					i = parseInt($p.attr(a));
+					
+					if (xy < 2) {
+						maxMove = i + (w * times);
+					} else {
+						maxMove = i - (w * times);
+					}
+						
+					var t = setInterval(function() {
+					
+						if (xy < 2) {
+							i = i + move;
+						} else {
+							i = i - move;
+						}
+						
+						$p.attr(a, i);
+						//console.debug(i % w);
+						//alert(i + 'xxx' + (i % w));
+						if (i % w === 0) {
+							
+							times--;
+						}
+
+						if (xy < 2) {
+							if (i >= maxMove || i >= max) {
+								clearInterval(t);
+								
+								if (times > 0) {
+									xy++;
+									if (xy > 3) {
+										xy = 0;
+									}
+									v.movePiece(indx, times, xy, func);
+								} else {
+									
+									if (maxMove === max) {
+										xy++;
+										if (xy > 3) {
+											xy = 0;
+										}										
+									}
+									m.player[indx].where = xy;
+									func();
+									//alert(maxMove + ', ' + max);
+								}
+							}
+						} else {
+							if (i <= maxMove || i <= max) {
+								clearInterval(t);
+								
+								if (times > 0) {
+									xy++;
+									if (xy > 3) {
+										xy = 0;
+									}
+									v.movePiece(indx, times, xy, func);
+								} else {
+									
+									if (maxMove === max) {
+										xy++;
+										if (xy > 3) {
+											xy = 0;
+										}										
+									}
+									m.player[indx].where = xy;	
+									func();
+									//alert(maxW + ', ' + maxH + ', ' + max);
+								}
+							}						
+						}
+					}, m.fac);
+				
+				},
+				
+				setLoser: function(indx) {
+					$('#p' + indx).attr('stroke', m.player[indx].color).attr('fill', 'grey');
+				},
+			
+				showMarker: function(i, color) {
+					$('#marker_' + i).attr('fill', color).show();
+				},
+			
+				showTable: function(str) {
+					$('#summary').html(str);
+				},
+				
+				showBoard: function(str) {
+					$('#board').html(str);
+				},				
+			
+				updateSummary: function(property, curP, color) {
+					if (property) {
+						$('#t' + curP).append('<div style="color: ' + color + '">' + property + '</div>');
+					} else {
+						$('#t' + curP).html('');
+					}
+				},
+				
+				updateAmount: function(amt, curP) {
+					$('#a' + curP).html('$' + amt);
+				},
+			
+				showDice: function(player, dice, color) {
+					$('#status').prepend('<section style="color: ' + color +'">' + player + ' rolled ' + dice + '</section>');
+				},
+				
+				showLocation: function(player, location) {
+					$('#status').prepend('<section class="loc">' + player + ' is at ' + location + '</section>');
+				},
+				
+				showAction: function(msg) {
+					var cls = 'rent';
+				
+					if (msg.indexOf('buys') + 1) {
+						cls = 'buy';
+					} else if (msg.indexOf('owns') + 1) {
+						cls = 'own';
+					}
+					
+					$('#status').prepend('<section class="' + cls + '">' + msg + '</section>');
+				},
+				
+				showLoser: function(loser) {
+					$('#status').prepend('<section class="lose">' + loser + ' is bankrupt!</section>');
+				},
+				
+				showWinner: function(msg) {
+					$('#status').prepend('<section class="win">' + msg + '</section>');
+				}				
+				
+			};
+			
+			var c = {
+				doPiece: function() {
+					var str = '<g>',
+						cx, cy, 
+						r = m.boxWidth / 4,
+						color;
+				
+					for (var i = 0, max = m.player.length; i < max; i++) {
+					
+						color = m.player[i].color;
+						
+						switch(i) {
+							case 0:
+								cx = r;
+								cy = r;
+								break;
+							case 1:
+								cx = cx + r * 2;
+								break;
+							case 2:
+								cx = r;
+								cy = cy + r * 2;
+								break;
+							case 3:
+								cx = cx + r * 2;
+						}
+						str = str + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" stroke="black" stroke-width="3" fill="' + color + '" id="p' + i + '" />';
+					}
+					
+					return str + '</g>';
+				},
+			
+				doBoard: function(str2) {
+					var str = '<svg id="gBoard">',
+						w = m.boxWidth,
+						h = m.boxHeight,
+						mh = Math.floor(h / 3),
+						xPos, yPos, yPos2, mw, xPos2,
+						sColor = '#000',
+						sWidth = '3',
+						i = 0,
+						saved,
+						max1 = Math.floor(m.board.length / 4),
+						max2 = Math.round(m.board.length / 4)
+					
+					for (var j = 0; j < 4; j++) {
+						if (j % 2) {
+							max = max1;
+							m.maxH = max;
+						} else {
+							max = max2;
+							m.maxW = max;
+						}
+						for (var k = 0; k < max; k++) {
+						
+							switch(j) {
+								case 0:
+									xPos = k * w;
+									yPos = 0;
+									yPos2 = yPos;
+									xPos2 = xPos;
+									mw = w;
+									break;
+								case 1:
+									xPos = xPos;
+									yPos = w + k * w;
+									yPos2 = yPos;
+									saved = yPos;
+									mh = h;
+									mw = Math.floor(h / 3);
+									xPos2 = xPos + w - mw;
+									break;
+								case 2:
+									xPos = ((max - 1) - k) * w;
+									yPos = saved + w;
+									mh = Math.floor(h / 3);
+									yPos2 = yPos + h - mh;
+									xPos2 = xPos;
+									mw = w;
+									break;									
+								case 3:
+									xPos = 0;
+									yPos = w + ((max - 1) - k)  * w;
+									yPos2 = yPos;
+									xPos2 = xPos;
+									mh = h;
+									mw = Math.floor(h / 3);
+									break;
+							}
+								
+							str = str + '<rect width="' + w +
+								'" height="' + h + 
+								'" fill="' + m.board[i].color +
+								'" stroke="' + sColor + 
+								'" stroke-width="' + sWidth + 
+								'" x="' + xPos + 
+								'" y="' + yPos + 
+								'" />';
+								
+							str = str + '<rect width="' + mw +
+								'" height="' + mh +
+								'" fill="orange' +
+								'" stroke="' + sColor + 
+								'" stroke-width="' + sWidth + 
+								'" x="' + xPos2 + 
+								'" y="' + yPos2 +
+								'" class="marker' +
+								'" id="marker_' + i +								
+								'" />';								
+							i++;
+						}
+					}
+					return str + str2 + '</svg>';
+				},
+			
+				doTable: function() {
+					var str = '<table id="pTable" cellspacing="0"><thead><tr>',
+						bool = true;
+
+					for (var j = 0; j < 2; j++) {
+					
+						for (var i = 0, max = m.player.length; i < max; i++) {
+							if (bool) {
+								str = str + '<th style="background-color: ' + m.player[i].color + '">' + m.player[i].role + '<span class="amount" id="a' + i + '">$' + m.player[i].wallet + '</span></th>';
+							} else {
+								str = str + '<td id="t' + i + '"></td>';
+							}
+						}
+						if (bool) {
+							str = str + '</tr></thead><tbody><tr>';
+						}
+						bool = false;
+					}
+					
+					return str + '</tr></tbody></table>';
+				},
+			
+				findWinner: function() {
+					for (var i = 0, max = m.player.length; i < max; i++) {
+						if (m.player[i].stat) {
+							console.log(m.board);
+							return m.player[i].role + ' wins with ' + m.player[i].wallet + '!';
+						}
+					}
+					
+					
+				},
+			
+				doAction: function(player, dice) {
+					
+					if (m.board[dice].val > 10) {
+						if (m.board[dice].owner === -1) {
+							//buy
+							m.board[dice].owner = m.curP;
+							m.player[m.curP].wallet = m.player[m.curP].wallet - m.board[dice].val;
+							v.updateAmount(m.player[m.curP].wallet, m.curP);
+							v.updateSummary(m.board[dice].loc, m.curP, m.board[dice].color);
+							v.showMarker(dice, m.player[m.curP].color);
+							
+							return m.player[m.curP].role + ' buys ' + m.board[dice].loc + ' for $' + m.board[dice].val + '.  Net: ' + m.player[m.curP].wallet;
+						} else if (m.board[dice].owner !== m.curP) {
+							//pay rent
+							m.player[m.curP].wallet = m.player[m.curP].wallet - m.board[dice].val;
+							m.player[m.board[dice].owner].wallet = m.player[m.board[dice].owner].wallet + m.board[dice].val;
+							v.updateAmount(m.player[m.curP].wallet, m.curP);
+							v.updateAmount(m.player[m.board[dice].owner].wallet, m.board[dice].owner);
+							
+							return m.player[m.curP].role + ' pays rent of ' + m.board[dice].val + '.  Net: ' + m.player[m.curP].wallet;
+						} else {
+							return m.player[m.curP].role + ' owns ' + m.board[dice].loc;
+						}
+					} else {
+						return 'Nothing to do.  Net: ' + m.player[m.curP].wallet;
+					}
+				},
+				
+				rollDice: function() {
+					var d1, d2;
+					
+						d1 = Math.floor(Math.random() * 5) + 1;
+						d2 = Math.floor(Math.random() * 5) + 1;
+						
+					return d1 + d2;
+				},
+				
+				getMove: function(dice, pos) {
+					var bIndices = m.board.length,
+						move = dice + pos;
+
+					if (move >= bIndices) {
+						move = move - bIndices;
+					}
+					
+					return move;				
+				},
+				
+				mainLoop: function() {
+						
+					if (!m.numPlayers) {
+						v.showWinner(c.findWinner());
+					} else {
+						if (m.player[m.curP].stat) {
+						
+							var dice = c.rollDice();
+							var move = c.getMove(dice, m.player[m.curP].pos);
+							
+							//console.debug(dice, m.player[m.curP].pos, move);
+							var player = m.player[m.curP].role;
+							var location = m.board[move].loc;
+							
+							m.setPosition(m.curP, move);
+							v.showDice(player, dice, m.player[m.curP].color);
+							v.movePiece(m.curP, dice, m.player[m.curP].where, function() {
+								
+								v.showLocation(player, location);
+								v.showAction(c.doAction(player, move));								
+							
+								if (m.player[m.curP].wallet < 1) {
+									m.player[m.curP].stat = 0;
+									m.numPlayers--;
+									m.updateProperties(move);
+									v.updateSummary('', m.curP);
+									v.showLoser(player);
+									v.setLoser(m.curP);
+								}
+
+								m.curP++;
+						
+								if (m.curP > 3) {
+									m.curP = 0;
+								}
+								
+								c.mainLoop();
+								
+							});
+						} else {
+							m.curP++;
+					
+							if (m.curP > 3) {
+								m.curP = 0;
+							}
+
+							c.mainLoop();						
+						}
+						
+					}
+		
+				}
+
+			};		
+			
+			function events() {
+
+			}
+			
+			function init() {
+			
+				events();	
+				v.showTable(c.doTable());
+				v.showBoard(c.doBoard(c.doPiece()));
+				c.mainLoop();
+
+			}
+			
+			return {
+				init: init
+			};
+			
+		})();
+		
+		mono.init();
+	</script>
+</body>
+</html>
