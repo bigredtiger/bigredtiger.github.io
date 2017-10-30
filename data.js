@@ -111,6 +111,7 @@ var DATA = {
 		{quote: 'What we play is life', auth: 'Louis Armstrong'},
 		{quote: 'It\'s the game of life. Do I win or do I lose? One day they\'re gonna shut the game down. I gotta have as much fun and go around the board as many times as I can before it\'s my turn to leave', auth: 'Tupac Shakur'}, 
 		{quote: 'Reality is wrong. Dreams are for real', auth: 'Tupac Shakur'},
+		{quote: 'We’re having too good a time today. We ain’t thinking about tomorrow', auth: 'John Dillinger'},		
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
