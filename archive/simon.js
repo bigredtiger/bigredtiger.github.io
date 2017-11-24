@@ -86,7 +86,7 @@ var DRAW = {
 
 var ALBUM = {
 	imgAry: [],
-	imgPath: './pics/',
+	imgPath: '../pics/',
 	max: 0,
 	count: 0,
 	slideBool: 0,
@@ -232,7 +232,7 @@ var ALBUM = {
 var SPLASH = pExtend(ALBUM);
 
 SPLASH.imgAry = [];
-SPLASH.imgPath = 'images/';
+SPLASH.imgPath = '../images/';
 SPLASH.count = 0;
 SPLASH.max = 0;
 
