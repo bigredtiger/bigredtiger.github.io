@@ -67,7 +67,7 @@ footer {
 	float: left;
 	width: 464px;
 	height: 312px;
-	background: url(images/splash4.jpg) no-repeat;
+	background: url(../images/splash4.jpg) no-repeat;
 	}
 #quote {
 	margin: 0;
@@ -299,7 +299,7 @@ footer {
 .home, .photos, .resume, .games,
 .home_g, .photos_g, .resume_g, .games_g {
 	display: block;	
-	background: url(images/menu_sprite.png) no-repeat;
+	background: url(../images/menu_sprite.png) no-repeat;
 	}
 .home, .home_g {
 	width: 30px;
