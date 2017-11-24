@@ -1,95 +1,371 @@
 <!DOCTYPE html>
-<html>
-<head>
-	<title>Simon Wong :: BigRedTiger.com</title>
-	<link rel="shortcut icon" href="favicon.ico">
-	<meta charset="utf-8" />
-	<meta name="Author" content="Simon Wong">
-	<meta name="keywords" content="Simon Wong :: BigRedTiger.com">
-	<meta name="description" content="Simon Wong :: BigRedTiger.com">	
-	<link rel="stylesheet" href="simon.css" type="text/css">
-</head>
-<body>
-<script>
-	(function() {
-		var shimArray = ['header', 'nav', 'article', 'section', 'footer'];
-		for (var i = shimArray.length; i--;) {
-			document.createElement(shimArray[i]);
-		}
-	})();
-</script>
-<header>
-	<h1>BigRedTiger.com</h1>
-	<h2>Simon Wong :: BigRedTiger.com</h2>
-</header>
-<nav id="mainNav"></nav>
-<article id="homePage">
-	<section id="splashBox">
-		<div id="pic"></div>
-		<p id="caption">Salt Lake City</p>
-		<p id="contact"><a href="mailto:simon@bigredtiger.com" title="Email Me">simon@bigredtiger.com</a></p>
-	</section>
-	<section id="quoteBox">
-		<p id="quote"></p>
-		<p id="auth"></p>
-	</section>
-</article>
-<article id="photosPage">
-	<section id="photoBox">
-		<p id="counter"></p>
-		<img id="myImg" title="Next" />
-		<a href="#" id="left" title="Previous"></a>
-		<p id="desc"></p>
-	</section>
-	<nav id="photoNav">
-		<ul>
-			<li id="playEl"><a href="#" id="playLink"><canvas id="play" width="10" height="10"></canvas></a></li>
-			<li id="pauseEl"><a href="#" id="pauseLink"><canvas id="pause" width="10" height="10"></canvas></a></li>
-			<li><a href="#" id="prevLink"><canvas id="prev" width="10" height="10"></canvas></a></li>
-			<li><a href="#" id="nextLink"><canvas id="next" width="10" height="10"></canvas></a></li>
-		</ul>
-	</nav>
-</article>
-<article id="resumePage">
-	<section id="resumeBox">
-		<section id="myPic" title="Simon Wong's Picture"></section>
-		<section class="links">
-		<ul>
-			<li><a href="resource/resume_simon.docx" target="_blank" title="Simon Wong's Resume">Technical Resume</a></li>
-		</ul>
-		</section>
-	</section>
-</article>
-<article id="gamesPage">
-	<section class="links">
-	<ul id="gameCube">
-		<li class="cat"><span class="catName">Games</span>
-		<ul class="gameBox">
-			<li class="game"><a href="games/ttt.html" target="_blank" title="Tic-tac-toe" class="gameLink">Tic-tac-toe</a></li>
-			<li class="game"><a href="games/blkjk.html" target="_blank" title="Blackjack" class="gameLink">Blackjack</a></li>
-			<li class="game"><a href="games/btlshp.html" target="_blank" title="Battleship" class="gameLink">Battleship</a></li>
-			<li class="game"><a href="games/ski.html" target="_blank" title="Ski" class="gameLink">Ski</a></li>
-			<li class="game"><a href="games/tetris.html" target="_blank" title="Tetris" class="gameLink">Tetris</a></li>
-		</ul>
-		</li>
-		<li class="cat"><span class="catName">Sims</span>
-		<ul class="gameBox">
-			<li class="game"><a href="games/mono.html" target="_blank" title="Monopoly" class="gameLink">Monopoly</a></li>
-		</ul>
-		</li>
-	</ul>
-	</section>
-</article>
-<footer>Copyright &copy; 2000-<span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
-<script src="data.js"></script>
-<script src="simon.js"></script>
-</body>
+<html lang="en">
+	<head>
+		<link rel="shortcut icon" href="favicon.ico">
+		<meta charset="utf-8">
+		<meta name="Author" content="Simon Wong">
+		<meta name="keywords" content="Simon Wong :: BigRedTiger.com">
+		<meta name="description" content="Simon Wong :: BigRedTiger.com">			
+		<title>Simon Wong :: BigRedTiger.com</title>
+		<style>
+			body {
+				background-color: #000;
+				color: lavender;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				margin-left: 10px;
+			}
+			h1, h2 {
+				color: #000;
+			}
+			#mainNav {
+				position: absolute;
+				right: 10px;
+			}
+			#menu {
+				margin: 0;
+				list-style: none;
+			}
+			.menuItem {
+				text-align: right;
+				padding: 8px 0 12px 0;
+				margin-bottom: 8px;
+				cursor: pointer;
+			}
+			.menuItem:first-child {
+				padding-top: 0;
+			}
+			footer {
+				position: absolute;
+				bottom: 6px;
+				color: purple;
+			}
+			
+			/* home */
+			
+			#splash {
+				float: left;
+				margin-left: -10px;
+			}
+			#splashImg {
+				background: no-repeat;
+				width: 464px;
+				height: 312px;
+				margin-bottom: 3px;
+			}
+			#splashDesc {
+				margin-left: 10px;
+			}
+			#email {
+				float: right;
+				color: purple;
+			}
+			#quote {
+				float: left;
+				width: 33%;
+				font-family: times, serif;
+				margin: 0 0 0 28px;
+			}
+			#quoteText {
+				margin: 0;
+				font-size: 2em;
+				text-align: justify;
+				line-height: 34px;
+			}
+			#quoteText:first-letter {
+				font-size: 2.2em;
+				color: violet;
+			}			
+			#author {
+			    font-size: 1.8em;
+				color: purple;
+				font-weight: bold;
+				margin-top: 39px;
+			}
+			
+			/* photos */
+			
+			#photos {
+				margin-top: -80px;
+				float: left;
+				position: relative;
+			}
+			#counter {
+				margin: 0 0 1px 0;
+			}
+			#myImg {
+				float: left;
+				margin-right: 20px;
+				cursor: pointer;
+				max-width: 680px;
+				max-height: 540px;
+			}
+			#desc {
+				margin-top: 0;
+				float: left;
+				width: 280px;
+			}
+			#left {
+				position: absolute;
+				display: block;
+			}			
+			
+			/* resume */
+			
+			#profileImg {
+				background: url(./images/simonw.jpg) no-repeat;
+				width: 130px;
+				height: 162px;
+				float: left;
+			}
+			#resume, #resume:visited {
+				margin-left: 28px;
+				color: cyan;
+				text-decoration: none;
+				float: left;
+			}
+			
+			/* games */
+
+			#games {
+				float: left;
+				display: flex;
+				flex-flow: row wrap;
+			}
+			.cat {
+				flex: 0 0 100%;
+				text-transform: lowercase;
+				margin-bottom: 10px;
+			}
+			.game, .game:visited {
+				flex: 0 0 60px;
+				background-color: violet;
+				height: 60px;
+				margin: 0 10px 10px 0;
+				padding: 10px;
+				color: #000;
+				text-decoration: none;
+			}			
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>BigRedTiger.com</h1>
+			<h2>Simon Wong :: BigRedTiger.com</h2>
+		</header>
+		<section id="container"></section>
+		<nav id="mainNav"></nav>
+		<footer>Copyright &copy; 2000 - <span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
+		<script src="data.js"></script>
+		<script>
+			class Main {
+				constructor() {
+					this.imgAry = [];
+					this.picAry =[];
+					this.classes = {
+						home: Home,
+						photos: Photos,
+						resume: Resume,
+						games: Games
+					};
+					this.homeConfig = {
+						imgs: this.imgAry,
+						splash: DATA.splash,
+						quotes: DATA.quotes
+					};	
+					this.prevMenuId;
+					
+					this.setFooterYear();
+					this.renderNav();					
+					this.init();
+					this.events();					
+				}
+				preLoad(imgPath, srcAry, imgAry) {
+					for (let i = 0, max = srcAry.length; i < max; i++) {
+						this[imgAry].push(new Image);
+						this[imgAry][i].src = imgPath + srcAry[i].photo;
+					}
+				}				
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}
+				setFooterYear() {
+					this.render('currentYear', (new Date).getFullYear());
+				}
+				showPage(txt) {
+					let config;
+				
+					if (this.classes[txt]) {
+						if (txt === 'home') {
+							if (!this.imgAry.length) {
+								this.preLoad('./images/', DATA.splash, 'imgAry');
+							}
+						
+							config = this.homeConfig;
+						} else if (txt === 'photos') {
+							if (!this.picAry.length) {
+								this.preLoad('./pics/', DATA.photos, 'picAry');
+							}
+							
+							config = {
+								imgs: this.picAry,
+								photos: DATA.photos
+							};
+						}
+					} else {
+						config = this.homeConfig;
+						txt = 'home';
+					}
+					
+					new this.classes[txt]('container', config);
+					
+					const id = `${txt}Menu`;
+					
+					if (this.prevMenuId) {
+						document.getElementById(this.prevMenuId).style.color = '';
+					}
+					document.getElementById(id).style.color = 'violet';
+					this.prevMenuId = id;
+				}
+				events() {
+					document.getElementById('mainNav').addEventListener('click', e => {
+						const txt = e.target.innerText;
+						
+						location.href = `#!${txt}`;
+					}, true);
+					
+					window.addEventListener('hashchange', e => {
+						const txt = location.hash.substring(2);
+						
+						this.showPage(txt);
+					}, true);
+				}
+				renderNav() {
+					let tpl = '<ul id="menu">';
+					const menu = DATA.menu;
+					
+					for (let i = 0; i < menu.length; i++) {
+						tpl = `${tpl}<li class="menuItem" id="${menu[i]}Menu">${menu[i]}</li>`;
+					}
+					
+					this.render('mainNav', `${tpl}</ul>`);
+				}
+				init() {
+					if (location.hash) {
+						this.showPage(location.hash.substring(2));
+					} else {
+						this.showPage('home');
+					}
+				}
+			}
+			class Home {
+				constructor(container, config) {
+					this.imgs = config.imgs;
+					this.splash = config.splash;
+					this.quotes = config.quotes;
+					
+					this.render(container, this.getTpl());
+					this.show();
+				}
+				show() {
+					const splashIdx = this.rand(this.splash.length);
+					const quoteIdx = this.rand(this.quotes.length);
+					
+					document.getElementById('splashImg').style.backgroundImage = `url(${this.imgs[splashIdx].src})`;
+					this.render('splashDesc', this.splash[splashIdx].desc);
+					this.render('quoteText', this.quotes[quoteIdx].quote);
+					if (this.quotes[quoteIdx].auth) {
+						this.render('author', this.quotes[quoteIdx].auth);
+					}
+				}
+				rand(max) {
+					return Math.floor(Math.random() * max);
+				}
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}				
+				getTpl() {
+					return `
+						<section id="splash">
+							<div id="splashImg"></div>
+							<span id="splashDesc"></span>
+							<span id="email">simon@bigredtiger.com</span>
+						</section>
+						<section id="quote">
+							<p id="quoteText"></p>
+							<p id="author"></p>
+						</section>
+					`;
+				}
+			}
+			class Photos {
+				constructor(container, config) {
+					this.imgAry = config.imgs;
+					this.max = this.imgAry.length;
+					this.photos = config.photos;
+					
+					this.render(container, this.getTpl());
+					this.show(0);
+				}
+				show(i) {
+					document.getElementById('myImg').src = this.imgAry[i].src;
+					document.getElementById('counter').innerHTML = `${i + 1}/${this.max}`;
+					document.getElementById('desc').innerHTML = this.photos[i].desc;
+					//this.showClick();
+				}
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}				
+				getTpl() {
+					return `
+						<section id="photos">
+							<p id="counter"></p>
+							<img id="myImg" title="Next" />
+							<a href="#" id="left" title="Previous"></a>
+							<p id="desc"></p>
+						</section>
+					`;
+				}
+			}			
+			class Resume {
+				constructor(container) {
+					this.render(container, this.getTpl());
+				}
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}			
+				getTpl() {
+					return `
+						<div id="profileImg"></div>
+						<a href="./resource/resume_simon.docx" id="resume">Resume</a>
+					`;
+				}
+			}
+			class Games {
+				constructor(container) {
+					this.render(container, this.getTpl());
+				}
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}				
+				getTpl() {
+					let tpl = '<section id="games">';
+					const games = DATA.games;
+					
+					for (let i = 0; i < games.length; i++) {
+						tpl = `${tpl}<section class="cat">${games[i].cat}</section>`;
+						
+						const items = games[i].items;
+
+						for (let i = 0; i < items.length; i++) {
+							tpl = `${tpl}<a href="${items[i].url}" target="_blank" title="${items[i].desc}" class="game">${items[i].name}</a>`;
+						}
+					}
+					
+					return `${tpl}</section>`;
+				}
+			}			
+			new Main();
+		</script>
+	</body>
 </html>
-
-
-
-
-
-
-
-
