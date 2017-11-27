@@ -13,17 +13,32 @@
 				color: lavender;
 				font-family: verdana, sans-serif;
 				font-size: 12px;
-				margin-left: 10px;
+				margin: 0 10px;
+				display: flex;
+				flex-flow: row wrap;
+				height: 100vh;
+			}
+			header {
+				overflow: hidden;
+				flex: 0 0 100%;
+				height: 98px;
 			}
 			h1, h2 {
 				color: #000;
+				user-select: none;
+			}
+			#container {
+				flex: 0 0 88%;
+				display: flex;
+				flex-flow: row nowrap;
+				height: calc(100% - 125px);
 			}
 			#mainNav {
-				position: absolute;
-				right: 10px;
+				flex: 0 0 12%;
 			}
-			#menu {
+			#menu, #controls {
 				margin: 0;
+				padding: 0;
 				list-style: none;
 			}
 			.menuItem {
@@ -36,16 +51,19 @@
 				padding-top: 0;
 			}
 			footer {
-				position: absolute;
-				bottom: 6px;
+				flex: 0 0 100%;
+				align-self: flex-end;
+				padding-bottom: 6px;
 				color: purple;
 			}
 			
 			/* home */
 			
 			#splash {
-				float: left;
+				flex: 0 1 50%;
 				margin-left: -10px;
+				max-width: 464px;
+				align-self: flex-start;
 			}
 			#splashImg {
 				background: no-repeat;
@@ -61,10 +79,11 @@
 				color: purple;
 			}
 			#quote {
-				float: left;
-				width: 33%;
+				flex: 0 1 50%;
+				max-width: 33%;
 				font-family: times, serif;
 				margin: 0 0 0 28px;
+				align-self: flex-start;
 			}
 			#quoteText {
 				margin: 0;
@@ -86,51 +105,80 @@
 			/* photos */
 			
 			#photos {
-				margin-top: -80px;
-				float: left;
-				position: relative;
+				margin-top: -88px;
+				flex: 1;
+				display: flex;
+				flex-flow: row wrap;
+				align-content: flex-start;
+				height: calc(100% + 88px)
 			}
 			#counter {
 				margin: 0 0 1px 0;
+				user-select: none;
+				flex: 0 0 100%;
 			}
 			#myImg {
-				float: left;
+				flex: 0;
 				margin-right: 20px;
-				cursor: pointer;
-				max-width: 680px;
-				max-height: 540px;
+				max-height: 88%;
+				user-select: none;
 			}
 			#desc {
 				margin-top: 0;
-				float: left;
+				flex: 1;
 				width: 280px;
 			}
-			#left {
+
+			/* photos nav */
+			
+			#photosNav {
 				position: absolute;
-				display: block;
+				right: 0;
+				bottom: 0;
+				font-size: 1.1rem;
+				user-select: none;
+			}
+			.controlButton {
+				text-align: right;
+				padding: 10px;
+				cursor: pointer;
+			}
+			.controlButton:active {
+				color: violet;
+			}
+			#prev:after {
+				content: "\25c1";
+			}			
+			#next:after {
+				content: "\25b7";
+			}
+			.play:after {
+				content: "\25b6";
+			}
+			.pause:after {
+				color: violet;
+				content: "\23f8";
 			}			
 			
 			/* resume */
 			
 			#profileImg {
-				background: url(./images/simonw.jpg) no-repeat;
-				width: 130px;
+				background: no-repeat;
+				flex: 0 0 130px;
 				height: 162px;
-				float: left;
 			}
 			#resume, #resume:visited {
 				margin-left: 28px;
 				color: cyan;
 				text-decoration: none;
-				float: left;
 			}
 			
 			/* games */
 
 			#games {
-				float: left;
 				display: flex;
 				flex-flow: row wrap;
+				align-self: flex-start;
 			}
 			.cat {
 				flex: 0 0 100%;
@@ -155,25 +203,36 @@
 		</header>
 		<section id="container"></section>
 		<nav id="mainNav"></nav>
+		<nav id="photosNav"></nav>
 		<footer>Copyright &copy; 2000 - <span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
 		<script src="data.js"></script>
 		<script>
-			class Main {
-				constructor() {
+			class Renderer {				
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}			
+			}
+			class Main extends Renderer {
+				constructor(config = {
+					home: Home,
+					photos: Photos,
+					resume: Resume,
+					games: Games
+				}) {
+					super();
 					this.imgAry = [];
 					this.picAry =[];
-					this.classes = {
-						home: Home,
-						photos: Photos,
-						resume: Resume,
-						games: Games
-					};
+					this.profilePic;
+					this.classes = config;
+					this.currentPage;
+					this.eventContainer;
 					this.homeConfig = {
 						imgs: this.imgAry,
 						splash: DATA.splash,
 						quotes: DATA.quotes
 					};	
 					this.prevMenuId;
+					this.highlightColor = 'violet';
 					
 					this.setFooterYear();
 					this.renderNav();					
@@ -181,57 +240,76 @@
 					this.events();					
 				}
 				preLoad(imgPath, srcAry, imgAry) {
-					for (let i = 0, max = srcAry.length; i < max; i++) {
-						this[imgAry].push(new Image);
-						this[imgAry][i].src = imgPath + srcAry[i].photo;
+					if (Array.isArray(srcAry)) {
+						for (let i = 0, max = srcAry.length; i < max; i++) {
+							this[imgAry].push(new Image);
+							this[imgAry][i].src = imgPath + srcAry[i].photo;
+						}
+					} else {
+						this[imgAry] = new Image;
+						this[imgAry].src = imgPath + srcAry;
 					}
 				}				
-				render(sel, tpl) {
-					document.getElementById(sel).innerHTML = tpl;
-				}
 				setFooterYear() {
 					this.render('currentYear', (new Date).getFullYear());
 				}
 				showPage(txt) {
 					let config;
-				
+
 					if (this.classes[txt]) {
-						if (txt === 'home') {
-							if (!this.imgAry.length) {
-								this.preLoad('./images/', DATA.splash, 'imgAry');
-							}
-						
-							config = this.homeConfig;
-						} else if (txt === 'photos') {
-							if (!this.picAry.length) {
-								this.preLoad('./pics/', DATA.photos, 'picAry');
-							}
+						switch(txt) {
+							case 'home':
+								if (!this.imgAry.length) {
+									this.preLoad('./images/', DATA.splash, 'imgAry');
+								}					
+
+								config = this.homeConfig;
+								break;
+							case 'photos':
+								if (!this.picAry.length) {
+									this.preLoad('./pics/', DATA.photos, 'picAry');
+								}
 							
-							config = {
-								imgs: this.picAry,
-								photos: DATA.photos
-							};
+								config = {
+									imgs: this.picAry,
+									photos: DATA.photos,
+									navContainer: 'photosNav'
+								};
+								break;
+							case 'resume':
+								config = { profilePic: this.profilePic };
 						}
 					} else {
 						config = this.homeConfig;
 						txt = 'home';
 					}
+					if (this.currentPage && this.currentPage.eventHandler) {
+						this.eventContainer.removeEventListener('click', this.currentPage.eventHandler);
+						this.eventContainer.innerHTML = '';
+					}
 					
-					new this.classes[txt]('container', config);
+					this.currentPage = new this.classes[txt]('container', config);
+					
+					if (this.currentPage.eventHandler) {
+						this.eventContainer = document.getElementById(config.navContainer);
+						this.eventContainer.addEventListener('click', this.currentPage.eventHandler.bind(this.currentPage), true);
+					}					
 					
 					const id = `${txt}Menu`;
 					
 					if (this.prevMenuId) {
 						document.getElementById(this.prevMenuId).style.color = '';
 					}
-					document.getElementById(id).style.color = 'violet';
+					document.getElementById(id).style.color = this.highlightColor;
 					this.prevMenuId = id;
 				}
 				events() {
 					document.getElementById('mainNav').addEventListener('click', e => {
 						const txt = e.target.innerText;
-						
-						location.href = `#!${txt}`;
+
+						if (e.target.tagName === 'LI') {
+							location.href = `#!${txt}`;
+						}
 					}, true);
 					
 					window.addEventListener('hashchange', e => {
@@ -251,6 +329,7 @@
 					this.render('mainNav', `${tpl}</ul>`);
 				}
 				init() {
+					this.preLoad('./images/', 'simonw.jpg', 'profilePic');
 					if (location.hash) {
 						this.showPage(location.hash.substring(2));
 					} else {
@@ -258,81 +337,93 @@
 					}
 				}
 			}
-			class Home {
+			class Home extends Renderer {
 				constructor(container, config) {
+					super();
 					this.imgs = config.imgs;
 					this.splash = config.splash;
 					this.quotes = config.quotes;
+					this.splashIdx = this.rand(this.splash.length);
+					this.quoteIdx = this.rand(this.quotes.length);
 					
 					this.render(container, this.getTpl());
-					this.show();
-				}
-				show() {
-					const splashIdx = this.rand(this.splash.length);
-					const quoteIdx = this.rand(this.quotes.length);
-					
-					document.getElementById('splashImg').style.backgroundImage = `url(${this.imgs[splashIdx].src})`;
-					this.render('splashDesc', this.splash[splashIdx].desc);
-					this.render('quoteText', this.quotes[quoteIdx].quote);
-					if (this.quotes[quoteIdx].auth) {
-						this.render('author', this.quotes[quoteIdx].auth);
-					}
+					document.getElementById('splashImg').style.backgroundImage = `url(${this.imgs[this.splashIdx].src})`;
 				}
 				rand(max) {
 					return Math.floor(Math.random() * max);
-				}
-				render(sel, tpl) {
-					document.getElementById(sel).innerHTML = tpl;
 				}				
 				getTpl() {
 					return `
 						<section id="splash">
 							<div id="splashImg"></div>
-							<span id="splashDesc"></span>
+							<span id="splashDesc">${this.splash[this.splashIdx].desc}</span>
 							<span id="email">simon@bigredtiger.com</span>
 						</section>
 						<section id="quote">
-							<p id="quoteText"></p>
-							<p id="author"></p>
+							<p id="quoteText">${this.quotes[this.quoteIdx].quote}</p>
+							<p id="author">${this.quotes[this.quoteIdx].auth && this.quotes[this.quoteIdx].auth}</p>
 						</section>
 					`;
 				}
 			}
-			class Photos {
+			class Photos extends Renderer {
 				constructor(container, config) {
+					super();
+					this.container = container;
 					this.imgAry = config.imgs;
-					this.max = this.imgAry.length;
+					this.max = this.imgAry.length - 1;
 					this.photos = config.photos;
+					this.count = 0;
 					
-					this.render(container, this.getTpl());
-					this.show(0);
+					this.show(this.count);
+					this.render(config.navContainer, this.getNavTpl());
 				}
-				show(i) {
-					document.getElementById('myImg').src = this.imgAry[i].src;
-					document.getElementById('counter').innerHTML = `${i + 1}/${this.max}`;
-					document.getElementById('desc').innerHTML = this.photos[i].desc;
-					//this.showClick();
-				}
-				render(sel, tpl) {
-					document.getElementById(sel).innerHTML = tpl;
+				next() {
+					this.count = this.count < this.max ? this.count + 1 : 0;
+					this.show(this.count);
 				}				
-				getTpl() {
+				prev() {
+					this.count = this.count > 0 ? this.count - 1 : this.max;
+					this.show(this.count);
+				}				
+				show(i) {
+					this.render(this.container, this.getTpl(i));
+					document.getElementById('myImg').src = this.imgAry[i].src;
+				}				
+				getTpl(i) {
 					return `
 						<section id="photos">
-							<p id="counter"></p>
-							<img id="myImg" title="Next" />
-							<a href="#" id="left" title="Previous"></a>
-							<p id="desc"></p>
+							<p id="counter">${i + 1}/${this.max + 1}</p>
+							<img id="myImg" />
+							<p id="desc">${this.photos[i].desc}</p>
 						</section>
 					`;
 				}
-			}			
-			class Resume {
-				constructor(container) {
-					this.render(container, this.getTpl());
+				getNavTpl() {
+					return `
+						<ul id="controls">
+							<li id="prev" class="controlButton"></li>
+							<li id="next" class="controlButton"></li>
+							<li id="toggle" class="controlButton pause"></li>
+						</ul>
+					`;				
 				}
-				render(sel, tpl) {
-					document.getElementById(sel).innerHTML = tpl;
+				eventHandler(e) {
+					const id = e.target.id;
+
+					if (id === 'prev') {						
+						this.prev();
+					} else if (id === 'next') {
+						this.next();
+					}
+				}
+			}			
+			class Resume extends Renderer {
+				constructor(container, config) {
+					super();
+					this.profilePic = config.profilePic;
+					this.render(container, this.getTpl());
+					document.getElementById('profileImg').style.backgroundImage = `url(${this.profilePic.src})`;
 				}			
 				getTpl() {
 					return `
@@ -341,12 +432,10 @@
 					`;
 				}
 			}
-			class Games {
+			class Games extends Renderer {
 				constructor(container) {
+					super();
 					this.render(container, this.getTpl());
-				}
-				render(sel, tpl) {
-					document.getElementById(sel).innerHTML = tpl;
 				}				
 				getTpl() {
 					let tpl = '<section id="games">';
