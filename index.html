@@ -364,7 +364,7 @@
 						</section>
 						<section id="quote">
 							<p id="quoteText">${this.quotes[this.quoteIdx].quote}</p>
-							<p id="author">${this.quotes[this.quoteIdx].auth && this.quotes[this.quoteIdx].auth}</p>
+							<p id="author">${this.quotes[this.quoteIdx].auth ? this.quotes[this.quoteIdx].auth : '' }</p>
 						</section>
 					`;
 				}
