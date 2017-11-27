@@ -284,6 +284,9 @@
 						txt = 'home';
 					}
 					if (this.currentPage && this.currentPage.eventHandler) {
+						if (this.currentPage.destroy) {
+							this.currentPage.destroy();
+						}
 						this.eventContainer.removeEventListener('click', this.currentPage.eventHandler);
 						this.eventContainer.innerHTML = '';
 					}
@@ -374,6 +377,7 @@
 					this.max = this.imgAry.length - 1;
 					this.photos = config.photos;
 					this.count = 0;
+					this.playBool = false;
 					
 					this.show(this.count);
 					this.render(config.navContainer, this.getNavTpl());
@@ -389,7 +393,30 @@
 				show(i) {
 					this.render(this.container, this.getTpl(i));
 					document.getElementById('myImg').src = this.imgAry[i].src;
-				}				
+				}
+				togglePlay() {
+					if (!this.playBool) {
+						this.playBool = setInterval(() => {
+							this.next();
+							if (this.count >= this.max && this.playBool) {
+								clearInterval(this.playBool);
+								this.playBool = false;
+								this.count = -1;
+								this.toggleTpl();
+							}
+						}, 3000);
+					} else {
+						clearInterval(this.playBool);
+						this.playBool = false;
+					}
+				}
+				toggleTpl() {
+					if (this.playBool) {
+						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' pause';
+					} else {
+						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' play';
+					}
+				}
 				getTpl(i) {
 					return `
 						<section id="photos">
@@ -404,7 +431,7 @@
 						<ul id="controls">
 							<li id="prev" class="controlButton"></li>
 							<li id="next" class="controlButton"></li>
-							<li id="toggle" class="controlButton pause"></li>
+							<li id="toggle" class="controlButton play"></li>
 						</ul>
 					`;				
 				}
@@ -415,6 +442,14 @@
 						this.prev();
 					} else if (id === 'next') {
 						this.next();
+					} else if (id === 'toggle') {
+						this.togglePlay();
+						this.toggleTpl();
+					}
+				}
+				destroy() {
+					if (this.playBool) {
+						document.getElementById('toggle').click();
 					}
 				}
 			}			
