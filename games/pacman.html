@@ -21,7 +21,7 @@
 				flex-flow: row wrap;
 				background-color: blue;
 				border-radius: 6px;
-				padding: 20px;
+				/*padding: 20px;*/
 			}
 			.row {
 				flex: 0 0 100%;
@@ -43,6 +43,8 @@
 				height: 20px;
 				background-color: yellow;
 				border-radius: 10px;
+				margin-left: 20px;
+				margin-top: 20px;
 			}
 		</style>
 	</head>
@@ -55,21 +57,23 @@
 					this.cont = true;
 					this.step = 1;
 					this.block = 20;
-					this.left = 0;
-					this.top = 0;
+					this.left = 20;
+					this.top = 20;
 					this.prev = '';
 					this.board = [
-						[0,0,0,0,0,0,0],
-						[0,1,1,0,1,1,0],
-						[0,0,0,0,0,0,0],
-						[0,1,1,0,1,1,0],
-						[0,0,0,0,0,0,0]						
+						[1,1,1,1,1,1,1,1,1,1,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,0,1,0,1,1,1,0,1],
+						[0,0,1,0,1,0,1,0,0,0,0],
+						[1,0,1,1,1,0,1,1,1,0,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,1,1,1,1,1,1,1,1,1,1]						
 					];
 					this.border = {
-						topEnd: 0,
+						topEnd: this.block,
 						rightEnd: this.board[0].length * this.block - this.block,
 						bottomEnd: this.board.length * this.block - this.block,
-						leftEnd: 0
+						leftEnd: this.block
 					};					
 					this.keyCode = {
 						39: 'right',
@@ -79,30 +83,23 @@
 					};
 					this.init();
 				}
-				isInt(value) {
-					return !isNaN(value) && parseInt(Number(value)) == value && !isNaN(parseInt(value, 10));
-				}
-				isBarrier(dir) {				
-					const border = this.border;
+				isBarrier(dir) {
 					const posLeft = this.left;
 					const posTop = this.top;
-
+					
 					switch(dir) {
 						case 'right':
-							return posLeft >= border.rightEnd || (this.board[Math.round(posTop/this.block)] && 
-								this.board[Math.round(posTop/this.block)][Math.round(posLeft/this.block) + 1]);
+							return (this.board[Math.floor(posTop/this.block)] && 
+								this.board[Math.floor(posTop/this.block)][Math.floor(posLeft/this.block) + 1]);
 						case 'left':
-							return posLeft <= border.leftEnd || this.board[Math.round(posTop/this.block)][Math.round(posLeft/this.block) - 1];
+							return this.board[Math.ceil(posTop/this.block)][Math.ceil(posLeft/this.block) - 1];
 						case 'up':
-							return posTop <= border.topEnd || (this.board[Math.round(posTop/this.block) - 1] && 
-								this.board[Math.round(posTop/this.block) - 1][Math.round(posLeft/this.block)]);
+							return (this.board[Math.ceil(posTop/this.block) - 1] && 
+								this.board[Math.ceil(posTop/this.block) - 1][Math.ceil(posLeft/this.block)]);
 						case 'down':
-							return posTop >= border.bottomEnd || (this.board[Math.round(posTop/this.block) + 1] && 
-								this.board[Math.round(posTop/this.block) + 1][Math.round(posLeft/this.block)]);							
+							return (this.board[Math.floor(posTop/this.block) + 1] && 
+								this.board[Math.floor(posTop/this.block) + 1][Math.floor(posLeft/this.block)]);													
 					}
-				}
-				isPrev(dir) {
-					return dir === this.prev;
 				}
 				go(dir) {						
 					if (!this.isBarrier(dir) && this.cont) {
@@ -114,28 +111,30 @@
 						switch(dir) {
 							case 'right':
 								this.top = Math.floor(this.top / 10) * 10;
-								this.top % this.block ? this.top = this.top + 10 : this.top;
+								this.top % this.block ? this.top = this.top - 10 : this.top;
 								this.left += this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'left':
-								this.top = Math.floor(this.top / 10) * 10;
+								this.top = Math.ceil(this.top / 10) * 10;
 								this.top % this.block ? this.top = this.top + 10 : this.top;
+								//console.log('duh', this.top, this.left);
 								this.left -= this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'up':
-								this.left = Math.floor(this.left / 10) * 10;
+								this.left = Math.ceil(this.left / 10) * 10;
 								this.left % this.block ? this.left = this.left + 10 : this.left;
+								//console.log('duh', this.top, this.left);
 								this.top -= this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'down':
 								this.left = Math.floor(this.left / 10) * 10;
-								this.left % this.block ? this.left = this.left + 10 : this.left;
+								this.left % this.block ? this.left = this.left - 10 : this.left;
 								this.top += this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
@@ -147,7 +146,7 @@
 				events() {
 					document.addEventListener('keydown', e => {
 						const dir = this.keyCode[e.keyCode];
-						//console.log(e.keyCode);
+					
 						if (dir) {
 							if (this.animationId) {
 								cancelAnimationFrame(this.animationId);
