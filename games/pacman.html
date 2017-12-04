@@ -63,9 +63,9 @@
 					this.board = [
 						[1,1,1,1,1,1,1,1,1,1,1],
 						[1,0,0,0,0,0,0,0,0,0,1],
-						[1,0,1,0,1,0,1,1,1,0,1],
-						[0,0,1,0,1,0,1,0,0,0,0],
-						[1,0,1,1,1,0,1,1,1,0,1],
+						[1,0,1,0,1,0,1,0,1,0,1],
+						[0,0,0,0,1,0,1,0,0,0,0],
+						[1,0,1,0,1,1,1,0,1,0,1],
 						[1,0,0,0,0,0,0,0,0,0,1],
 						[1,1,1,1,1,1,1,1,1,1,1]						
 					];
@@ -83,50 +83,60 @@
 					};
 					this.init();
 				}
+				isPortal(dir) {
+					if (Math.floor(this.left/this.block) === this.board[0].length - 1 && dir === 'right') {
+						this.left = 0;
+					} else if (Math.floor(this.left/this.block) < 0 && dir === 'left') {
+						this.left = (this.board[0].length - 1) * this.block;
+					}
+				}
 				isBarrier(dir) {
 					const posLeft = this.left;
 					const posTop = this.top;
 					
+					this.isPortal(dir);
+					
 					switch(dir) {
 						case 'right':
-							return (this.board[Math.floor(posTop/this.block)] && 
-								this.board[Math.floor(posTop/this.block)][Math.floor(posLeft/this.block) + 1]);
+							return (this.board[Math.round(posTop/this.block)] && 
+								this.board[Math.round(posTop/this.block)][Math.floor(posLeft/this.block) + 1]);
 						case 'left':
-							return this.board[Math.ceil(posTop/this.block)][Math.ceil(posLeft/this.block) - 1];
+							return this.board[Math.round(posTop/this.block)][Math.ceil(posLeft/this.block) - 1];
 						case 'up':
 							return (this.board[Math.ceil(posTop/this.block) - 1] && 
-								this.board[Math.ceil(posTop/this.block) - 1][Math.ceil(posLeft/this.block)]);
+								this.board[Math.ceil(posTop/this.block) - 1][Math.round(posLeft/this.block)]);
 						case 'down':
 							return (this.board[Math.floor(posTop/this.block) + 1] && 
-								this.board[Math.floor(posTop/this.block) + 1][Math.floor(posLeft/this.block)]);													
+								this.board[Math.floor(posTop/this.block) + 1][Math.round(posLeft/this.block)]);													
 					}
 				}
 				go(dir) {						
 					if (!this.isBarrier(dir) && this.cont) {
-						this.prev = dir;
 						
 						const $pac = document.getElementById('pac');
 						
-						console.log(this.top, this.left);
+						//console.log(this.top, this.left);
 						switch(dir) {
 							case 'right':
 								this.top = Math.floor(this.top / 10) * 10;
-								this.top % this.block ? this.top = this.top - 10 : this.top;
+								this.top % this.block ? this.top = this.top + 10 : this.top;
 								this.left += this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'left':
 								this.top = Math.ceil(this.top / 10) * 10;
-								this.top % this.block ? this.top = this.top + 10 : this.top;
-								//console.log('duh', this.top, this.left);
+								this.top % this.block ? this.top = this.top - 10 : this.top;
+								this.top % this.block && this.prev === 'down' ? this.top = this.top + 10 : 
+									this.top % this.block && this.prev === 'up' ? this.top = this.top - 10 : this.top;
+								//console.log('duh', this.top, this.left, this.top % this.block, this.prev);
 								this.left -= this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'up':
 								this.left = Math.ceil(this.left / 10) * 10;
-								this.left % this.block ? this.left = this.left + 10 : this.left;
+								this.left % this.block ? this.left = this.left - 10 : this.left;
 								//console.log('duh', this.top, this.left);
 								this.top -= this.step;
 								$pac.style.marginTop = `${this.top}px`;
@@ -134,12 +144,13 @@
 								break;
 							case 'down':
 								this.left = Math.floor(this.left / 10) * 10;
-								this.left % this.block ? this.left = this.left - 10 : this.left;
+								this.left % this.block ? this.left = this.left + 10 : this.left;
 								this.top += this.step;
 								$pac.style.marginTop = `${this.top}px`;
 								$pac.style.marginLeft = `${this.left}px`;
 								break;								
 						}
+						this.prev = dir;
 						this.animationId = requestAnimationFrame(() => this.go(dir));
 					}
 				}
