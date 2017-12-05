@@ -46,6 +46,68 @@
 				margin-left: 20px;
 				margin-top: 20px;
 			}
+			.right {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.15turn);
+			}
+			.right:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}			
+			.down {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.4turn);			
+			}
+			.down:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}
+			.left {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.35turn);			
+			}
+			.left:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin2 .3s ease infinite;
+			}
+			.up {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(-.1turn);			
+			}
+			.up:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}
+			@keyframes spin {
+				to { transform: rotate(.2turn); }
+			}
+			@keyframes spin2 {
+				to { transform: rotate(-.2turn); }
+			}			
 		</style>
 	</head>
 	<body>
@@ -110,12 +172,16 @@
 								this.board[Math.floor(posTop/this.block) + 1][Math.round(posLeft/this.block)]);													
 					}
 				}
+				setView(dir, elem) {
+					elem.className = dir;
+				}
 				go(dir) {						
 					if (!this.isBarrier(dir) && this.cont) {
 						
 						const $pac = document.getElementById('pac');
 						
 						//console.log(this.top, this.left);
+						this.setView(dir, $pac);
 						switch(dir) {
 							case 'right':
 								this.top = Math.floor(this.top / 10) * 10;
