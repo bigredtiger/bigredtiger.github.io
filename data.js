@@ -234,7 +234,7 @@ var DATA = {
 				{name: 'Ski', url: 'ski.html', desc: 'Multi-levels ski and ride game with surprise final round'},
 				{name: 'Tetris', url: 'tetris.html', desc: 'Fully Canvas-based game with an object-oriented design using Factory design pattern'},
 				{name: 'Blackjack Deluxe', url: 'blackjack-deluxe.html', desc: 'Fully custom decks and functional blackjack using flexbox and es6'},
-				{name: 'Pac-man', url: 'pacman.html', desc: 'Pac-man using CSS3 animations and es6'}
+				{name: 'Pac-man', url: 'pacman-prod.html', desc: 'Pac-man using CSS3 animations and es6'}
 			]
 		},
 		{

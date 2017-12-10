@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Pac-man</title>
+		<style>
+			body {
+				background-color: #000;
+				color: #ddd;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 93vh;
+				margin: 0;
+			}
+			#container {
+				display: flex;
+				flex: 0;
+				flex-flow: row wrap;
+				background-color: blue;
+				border-radius: 6px;
+				/*padding: 20px;*/
+			}
+			.row {
+				flex: 0 0 100%;
+				display: flex;
+			}
+			.path, .clear {
+				width: 20px;
+				height: 20px;
+				background-color: #000;
+				color: #fff;
+				padding: 3px 0 0 7px;
+				box-sizing: border-box;
+			}
+			.path:before {
+				content: "\2022";
+			}
+			.path.clear:before {
+				content: none;
+			}
+			.wall {
+				width: 20px;
+				height: 20px;
+				background-color: blue;
+				
+			}
+			.wall.win {
+				background-color: red;
+				animation: blink 1s ease-in-out;
+			}
+			@keyframes blink {
+				50% { background-color: black; }
+				100% { background-color: red; }
+			}			
+			#pac {
+				position: absolute;
+				width: 20px;
+				height: 20px;
+				background-color: yellow;
+				border-radius: 10px;
+				margin-left: 20px;
+				margin-top: 20px;
+			}
+			.right {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.15turn);
+			}
+			.right:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}			
+			.down {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.4turn);			
+			}
+			.down:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}
+			.left {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(.35turn);			
+			}
+			.left:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin2 .3s ease infinite;
+			}
+			.up {
+				background-image: linear-gradient(to right, transparent 50%, #000 0);
+				transform: rotate(-.1turn);			
+			}
+			.up:before {
+				content: '';
+				display: block;
+				margin-left: 50%;
+				height: 100%;
+				border-radius: 0 100% 100% 0 / 50%;
+				background-color: yellow;
+				transform-origin: left;
+				animation: spin .3s ease infinite;
+			}
+			@keyframes spin {
+				to { transform: rotate(.2turn); }
+			}
+			@keyframes spin2 {
+				to { transform: rotate(-.2turn); }
+			}			
+		</style>
+	</head>
+	<body>
+		<section id="container"></section>
+		<script>
+			class Pacman {
+				constructor() {
+					this.win = false;
+					this.animationId;
+					this.cont = true;
+					this.step = 1;
+					this.block = 20;
+					this.left = 20;
+					this.top = 20;
+					this.prev = '';
+					this.board = [
+						[1,1,1,1,1,1,1,1,1,1,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,1,1,0,1,1,1,0,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,0,1,0,1,0,1,0,1],
+						[0,0,0,0,1,0,1,0,0,0,0],
+						[1,0,1,0,1,1,1,0,1,0,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,1,1,0,1,1,1,0,1],						
+						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,1,1,1,1,1,1,1,1,1,1]						
+					];
+					this.initBoard = JSON.stringify(this.board);
+					this.border = {
+						topEnd: this.block,
+						rightEnd: this.board[0].length * this.block - this.block,
+						bottomEnd: this.board.length * this.block - this.block,
+						leftEnd: this.block
+					};					
+					this.keyCode = {
+						39: 'right',
+						37: 'left',
+						40: 'down',
+						38: 'up'
+					};
+					
+					this.init();
+					this.events();
+				}
+				isPortal(dir) {
+					if (Math.ceil(this.left/this.block) === this.board[0].length && dir === 'right') {
+						this.left = 0;
+					} else if (Math.floor(this.left/this.block) < 0 && dir === 'left') {
+						this.left = (this.board[0].length - 1) * this.block;
+					}
+				}
+				isBarrier(dir) {
+					const posLeft = this.left;
+					const posTop = this.top;
+					
+					this.isPortal(dir);
+					
+					switch(dir) {
+						case 'right':
+							return (this.board[Math.round(posTop/this.block)] && 
+								this.board[Math.round(posTop/this.block)][Math.floor(posLeft/this.block) + 1] > 0);
+						case 'left':
+							return this.board[Math.round(posTop/this.block)][Math.ceil(posLeft/this.block) - 1] > 0;
+						case 'up':
+							return (this.board[Math.ceil(posTop/this.block) - 1] && 
+								this.board[Math.ceil(posTop/this.block) - 1][Math.round(posLeft/this.block)] > 0);
+						case 'down':
+							return (this.board[Math.floor(posTop/this.block) + 1] && 
+								this.board[Math.floor(posTop/this.block) + 1][Math.round(posLeft/this.block)] > 0);													
+					}
+				}
+				isWin() {
+					const max = this.board.length;
+					
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < this.board[i].length; j++) {
+							if (this.board[i][j] === 0 ) {
+								return false;
+							}
+						}
+					}
+					
+					return true;
+				}
+				setWinBoard() {
+					const max = this.board.length;
+				
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < this.board[i].length; j++) {
+							if (this.board[i][j] > 0) {
+								document.querySelector(`.row:nth-child(${i + 1}) .wall:nth-child(${j + 1})`).className = 'wall win';
+							}
+						}
+					}
+				}				
+				setPacView(dir, elem) {
+					elem.className = dir;
+				}
+				setPathView(pos, dir) {
+					if (((dir === 'right' || dir === 'down') && !(Math.ceil(pos) % 10)) || ((dir === 'left' || dir === 'up') && !(Math.floor(pos) % 10))) {
+						let top, left;
+						
+						if (dir === 'right' || dir === 'left') {
+							top = Math.round(this.top/this.block);
+							left = dir === 'right' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);	
+						} else {
+							left = Math.round(this.left/this.block);
+							top = dir === 'down' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);					
+						}
+						document.querySelector(`.row:nth-child(${top + 1}) .path:nth-child(${left + 1})`).className = 'path clear';
+						this.board[top][left] = -1;
+						
+						if (!this.win && this.isWin()) {
+							this.win = true;
+							this.setWinBoard();
+						}
+					}
+				}
+				go(dir) {						
+					if (!this.isBarrier(dir) && this.cont) {
+						
+						const $pac = document.getElementById('pac');
+						
+						//console.log(this.top, this.left);
+						this.setPacView(dir, $pac);
+						switch(dir) {
+							case 'right':
+								this.setPathView(this.left, dir);
+								this.top = Math.floor(this.top / 10) * 10;
+								this.top % this.block ? this.top = this.top + 10 : this.top;
+								this.left += this.step;
+								$pac.style.marginTop = `${this.top}px`;
+								$pac.style.marginLeft = `${this.left}px`;
+								break;
+							case 'left':
+								this.setPathView(this.left, dir);
+								this.top = Math.ceil(this.top / 10) * 10;
+								this.top % this.block ? this.top = this.top - 10 : this.top;
+								this.top % this.block && this.prev === 'down' ? this.top = this.top + 10 : 
+									this.top % this.block && this.prev === 'up' ? this.top = this.top - 10 : this.top;
+								//console.log('duh', this.top, this.left, this.top % this.block, this.prev);
+								this.left -= this.step;
+								$pac.style.marginTop = `${this.top}px`;
+								$pac.style.marginLeft = `${this.left}px`;
+								break;
+							case 'up':
+								this.setPathView(this.top, dir);
+								this.left = Math.ceil(this.left / 10) * 10;
+								this.left % this.block ? this.left = this.left - 10 : this.left;
+								//console.log('duh', this.top, this.left);
+								this.top -= this.step;
+								$pac.style.marginTop = `${this.top}px`;
+								$pac.style.marginLeft = `${this.left}px`;
+								break;
+							case 'down':
+								this.setPathView(this.top, dir);
+								this.left = Math.floor(this.left / 10) * 10;
+								this.left % this.block ? this.left = this.left + 10 : this.left;
+								this.top += this.step;
+								$pac.style.marginTop = `${this.top}px`;
+								$pac.style.marginLeft = `${this.left}px`;
+								break;								
+						}
+						this.prev = dir;
+						this.animationId = requestAnimationFrame(() => this.go(dir));
+					}
+				}
+				events() {
+					document.addEventListener('keydown', e => {
+						const dir = this.keyCode[e.keyCode];
+			
+						if (dir) {
+							if (this.animationId) {
+								cancelAnimationFrame(this.animationId);
+								this.cont = false;
+								if (this.isBarrier(dir)) {
+									this.cont = true;
+									this.go(this.prev);
+								} else {
+									this.cont = true;
+									this.go(dir);
+								}
+							} else {
+								this.cont = true;
+								this.go(dir);
+							}
+						} else if (e.keyCode === 13) {
+							this.win = false;
+							this.animationId = null;
+							this.cont = true;
+							this.step = 1;
+							this.block = 20;
+							this.left = 20;
+							this.top = 20;
+							this.prev = '';
+							this.board = JSON.parse(this.initBoard);
+							this.init();
+						}
+					}, true);
+				}
+				renderPac() {
+					const $container = document.getElementById('container');
+					let tpl = '<div id="pac"></div>';
+					$container.insertAdjacentHTML('beforeend', tpl);
+				}
+				renderBoard() {
+					const max = this.board.length;
+					let tpl = ``;
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < this.board[i].length; j++) {
+							if (j === 0) {
+								tpl = `${tpl}<div class="row">`;
+							}
+							if (!this.board[i][j]) {
+								tpl = `${tpl}<div class="path"></div>`;
+							} else {
+								tpl = `${tpl}<div class="wall"></div>`;
+							}
+							if (j === this.board[i].length - 1) {
+								tpl = `${tpl}</div>`;
+							}
+						}
+					}
+					document.getElementById('container').innerHTML = tpl;
+				}
+				init() {
+					console.log('Started.');
+					this.renderBoard();
+					this.renderPac();
+				}
+			}
+			new Pacman();
+		</script>
+	</body>
+</html>
