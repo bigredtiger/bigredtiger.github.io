@@ -227,20 +227,20 @@ var DATA = {
 		{
 			cat: 'Games',
 			items: [
-				{name: 'Tic-tac-toe', url: 'games/ttt.html', desc: 'A two-levels tic-tac-toe game with computer AI'},
-				{name: 'Blackjack', url: 'games/blkjk.html', desc: 'A simple blackjack game with Canvas images'},
-				{name: 'Battleship', url: 'games/btlshp.html', desc: 'Battleship game with auto ship placement, computer AI, and simulation'},
-				{name: 'Ski', url: 'games/ski.html', desc: 'Multi-levels ski and ride game with surprise final round'},
-				{name: 'Tetris', url: 'games/tetris.html', desc: 'Fully Canvas-based game with an object-oriented design using Factory design pattern'},
-				{name: 'Blackjack Deluxe', url: 'games/blackjack-deluxe.html', desc: 'Fully custom decks and functional blackjack using flexbox and es6'},
-				{name: 'Pac-man', url: 'games/pacman.html', desc: 'Pac-man using CSS3 animations and es6'}
+				{name: 'Tic-tac-toe', url: 'ttt.html', desc: 'A two-levels tic-tac-toe game with computer AI'},
+				{name: 'Blackjack', url: 'blkjk.html', desc: 'A simple blackjack game with Canvas images'},
+				{name: 'Battleship', url: 'btlshp.html', desc: 'Battleship game with auto ship placement, computer AI, and simulation'},
+				{name: 'Ski', url: 'ski.html', desc: 'Multi-levels ski and ride game with surprise final round'},
+				{name: 'Tetris', url: 'tetris.html', desc: 'Fully Canvas-based game with an object-oriented design using Factory design pattern'},
+				{name: 'Blackjack Deluxe', url: 'blackjack-deluxe.html', desc: 'Fully custom decks and functional blackjack using flexbox and es6'},
+				{name: 'Pac-man', url: 'pacman.html', desc: 'Pac-man using CSS3 animations and es6'}
 			]
 		},
 		{
 			cat: 'Sims',
 			items: [
-				{name: 'Monopoly', url: 'games/mono.html', desc: 'Fully customizable simulation done in pure SVG in a MVC framework'},
-				{name: 'Baseball', url: 'games/baseball.html', desc: 'Customizable baseball teams simulation'}
+				{name: 'Monopoly', url: 'mono.html', desc: 'Fully customizable simulation done in pure SVG in a MVC framework'},
+				{name: 'Baseball', url: 'baseball.html', desc: 'Customizable baseball teams simulation'}
 			]
 		}
 	]
