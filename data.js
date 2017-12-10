@@ -232,7 +232,8 @@ var DATA = {
 				{name: 'Battleship', url: 'games/btlshp.html', desc: 'Battleship game with auto ship placement, computer AI, and simulation'},
 				{name: 'Ski', url: 'games/ski.html', desc: 'Multi-levels ski and ride game with surprise final round'},
 				{name: 'Tetris', url: 'games/tetris.html', desc: 'Fully Canvas-based game with an object-oriented design using Factory design pattern'},
-				{name: 'Blackjack Deluxe', url: 'games/blackjack-deluxe.html', desc: 'Fully custom decks and functional blackjack using flexbox and es6'}
+				{name: 'Blackjack Deluxe', url: 'games/blackjack-deluxe.html', desc: 'Fully custom decks and functional blackjack using flexbox and es6'},
+				{name: 'Pac-man', url: 'games/pacman.html', desc: 'Pac-man using CSS3 animations and es6'}
 			]
 		},
 		{

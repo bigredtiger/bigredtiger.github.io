@@ -27,16 +27,34 @@
 				flex: 0 0 100%;
 				display: flex;
 			}
-			.path {
+			.path, .clear {
 				width: 20px;
 				height: 20px;
 				background-color: #000;
+				color: #fff;
+				padding: 3px 0 0 7px;
+				box-sizing: border-box;
+			}
+			.path:before {
+				content: "\2022";
+			}
+			.path.clear:before {
+				content: none;
 			}
 			.wall {
 				width: 20px;
 				height: 20px;
 				background-color: blue;
+				
 			}
+			.wall.win {
+				background-color: red;
+				animation: blink 1s ease-in-out;
+			}
+			@keyframes blink {
+				50% { background-color: black; }
+				100% { background-color: red; }
+			}			
 			#pac {
 				position: absolute;
 				width: 20px;
@@ -115,6 +133,7 @@
 		<script>
 			class Pacman {
 				constructor() {
+					this.win = false;
 					this.animationId;
 					this.cont = true;
 					this.step = 1;
@@ -125,12 +144,17 @@
 					this.board = [
 						[1,1,1,1,1,1,1,1,1,1,1],
 						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,1,1,0,1,1,1,0,1],
+						[1,0,0,0,0,0,0,0,0,0,1],
 						[1,0,1,0,1,0,1,0,1,0,1],
 						[0,0,0,0,1,0,1,0,0,0,0],
 						[1,0,1,0,1,1,1,0,1,0,1],
 						[1,0,0,0,0,0,0,0,0,0,1],
+						[1,0,1,1,1,0,1,1,1,0,1],						
+						[1,0,0,0,0,0,0,0,0,0,1],
 						[1,1,1,1,1,1,1,1,1,1,1]						
 					];
+					this.initBoard = JSON.stringify(this.board);
 					this.border = {
 						topEnd: this.block,
 						rightEnd: this.board[0].length * this.block - this.block,
@@ -143,10 +167,12 @@
 						40: 'down',
 						38: 'up'
 					};
+					
 					this.init();
+					this.events();
 				}
 				isPortal(dir) {
-					if (Math.floor(this.left/this.block) === this.board[0].length - 1 && dir === 'right') {
+					if (Math.ceil(this.left/this.block) === this.board[0].length && dir === 'right') {
 						this.left = 0;
 					} else if (Math.floor(this.left/this.block) < 0 && dir === 'left') {
 						this.left = (this.board[0].length - 1) * this.block;
@@ -161,19 +187,63 @@
 					switch(dir) {
 						case 'right':
 							return (this.board[Math.round(posTop/this.block)] && 
-								this.board[Math.round(posTop/this.block)][Math.floor(posLeft/this.block) + 1]);
+								this.board[Math.round(posTop/this.block)][Math.floor(posLeft/this.block) + 1] > 0);
 						case 'left':
-							return this.board[Math.round(posTop/this.block)][Math.ceil(posLeft/this.block) - 1];
+							return this.board[Math.round(posTop/this.block)][Math.ceil(posLeft/this.block) - 1] > 0;
 						case 'up':
 							return (this.board[Math.ceil(posTop/this.block) - 1] && 
-								this.board[Math.ceil(posTop/this.block) - 1][Math.round(posLeft/this.block)]);
+								this.board[Math.ceil(posTop/this.block) - 1][Math.round(posLeft/this.block)] > 0);
 						case 'down':
 							return (this.board[Math.floor(posTop/this.block) + 1] && 
-								this.board[Math.floor(posTop/this.block) + 1][Math.round(posLeft/this.block)]);													
+								this.board[Math.floor(posTop/this.block) + 1][Math.round(posLeft/this.block)] > 0);													
 					}
 				}
-				setView(dir, elem) {
+				isWin() {
+					const max = this.board.length;
+					
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < this.board[i].length; j++) {
+							if (this.board[i][j] === 0 ) {
+								return false;
+							}
+						}
+					}
+					
+					return true;
+				}
+				setWinBoard() {
+					const max = this.board.length;
+				
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < this.board[i].length; j++) {
+							if (this.board[i][j] > 0) {
+								document.querySelector(`.row:nth-child(${i + 1}) .wall:nth-child(${j + 1})`).className = 'wall win';
+							}
+						}
+					}
+				}				
+				setPacView(dir, elem) {
 					elem.className = dir;
+				}
+				setPathView(pos, dir) {
+					if (((dir === 'right' || dir === 'down') && !(Math.ceil(pos) % 10)) || ((dir === 'left' || dir === 'up') && !(Math.floor(pos) % 10))) {
+						let top, left;
+						
+						if (dir === 'right' || dir === 'left') {
+							top = Math.round(this.top/this.block);
+							left = dir === 'right' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);	
+						} else {
+							left = Math.round(this.left/this.block);
+							top = dir === 'down' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);					
+						}
+						document.querySelector(`.row:nth-child(${top + 1}) .path:nth-child(${left + 1})`).className = 'path clear';
+						this.board[top][left] = -1;
+						
+						if (!this.win && this.isWin()) {
+							this.win = true;
+							this.setWinBoard();
+						}
+					}
 				}
 				go(dir) {						
 					if (!this.isBarrier(dir) && this.cont) {
@@ -181,9 +251,10 @@
 						const $pac = document.getElementById('pac');
 						
 						//console.log(this.top, this.left);
-						this.setView(dir, $pac);
+						this.setPacView(dir, $pac);
 						switch(dir) {
 							case 'right':
+								this.setPathView(this.left, dir);
 								this.top = Math.floor(this.top / 10) * 10;
 								this.top % this.block ? this.top = this.top + 10 : this.top;
 								this.left += this.step;
@@ -191,6 +262,7 @@
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'left':
+								this.setPathView(this.left, dir);
 								this.top = Math.ceil(this.top / 10) * 10;
 								this.top % this.block ? this.top = this.top - 10 : this.top;
 								this.top % this.block && this.prev === 'down' ? this.top = this.top + 10 : 
@@ -201,6 +273,7 @@
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'up':
+								this.setPathView(this.top, dir);
 								this.left = Math.ceil(this.left / 10) * 10;
 								this.left % this.block ? this.left = this.left - 10 : this.left;
 								//console.log('duh', this.top, this.left);
@@ -209,6 +282,7 @@
 								$pac.style.marginLeft = `${this.left}px`;
 								break;
 							case 'down':
+								this.setPathView(this.top, dir);
 								this.left = Math.floor(this.left / 10) * 10;
 								this.left % this.block ? this.left = this.left + 10 : this.left;
 								this.top += this.step;
@@ -223,7 +297,7 @@
 				events() {
 					document.addEventListener('keydown', e => {
 						const dir = this.keyCode[e.keyCode];
-					
+			
 						if (dir) {
 							if (this.animationId) {
 								cancelAnimationFrame(this.animationId);
@@ -239,6 +313,17 @@
 								this.cont = true;
 								this.go(dir);
 							}
+						} else if (e.keyCode === 13) {
+							this.win = false;
+							this.animationId = null;
+							this.cont = true;
+							this.step = 1;
+							this.block = 20;
+							this.left = 20;
+							this.top = 20;
+							this.prev = '';
+							this.board = JSON.parse(this.initBoard);
+							this.init();
 						}
 					}, true);
 				}
@@ -271,7 +356,6 @@
 					console.log('Started.');
 					this.renderBoard();
 					this.renderPac();
-					this.events();
 				}
 			}
 			new Pacman();
