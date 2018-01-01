@@ -23,6 +23,9 @@
 				border-radius: 6px;
 				/*padding: 20px;*/
 			}
+			
+			/* board */
+			
 			.row {
 				flex: 0 0 100%;
 				display: flex;
@@ -54,15 +57,18 @@
 			@keyframes blink {
 				50% { background-color: black; }
 				100% { background-color: red; }
-			}			
+			}
+			
+			/* pac */
+			
 			#pac {
 				position: absolute;
 				width: 20px;
 				height: 20px;
 				background-color: yellow;
 				border-radius: 10px;
-				margin-left: 20px;
-				margin-top: 20px;
+				margin-left: 100px;
+				margin-top: 140px;
 			}
 			.right {
 				background-image: linear-gradient(to right, transparent 50%, #000 0);
@@ -125,7 +131,54 @@
 			}
 			@keyframes spin2 {
 				to { transform: rotate(-.2turn); }
+			}
+			
+			/* ghosts */
+
+			#blinky {
+				background: cyan;
+			}
+			.ghost {
+				position: absolute;
+				width: 20px;
+				height: 20px;
+				border-top-left-radius: 10px;
+				border-top-right-radius: 10px;
+				margin-left: 100px;
+				margin-top: 100px;
+			}
+			.ghost:after {
+				background: linear-gradient(-45deg, #000 3px, transparent 0), linear-gradient(45deg, #000 1px, transparent 0);
+				background-position: left-bottom;
+				background-repeat: repeat-x;
+				background-size: 6px 3px;
+				content: " ";
+				display: block;
+				position: absolute;
+				bottom: 0px;
+				left: 0px;
+				width: 100%;
+				height: 3px;				
 			}			
+			.leftEye, .rightEye {
+				width: 8px;
+				height: 6px;
+				background-color: white;
+				position: absolute;
+				top: 5px;
+				left: 3px;
+				border-radius: 6px;
+			}
+			.leftEye:before, .rightEye:before {
+				color: blue;
+				content: "\2022";
+				position: relative;
+				top: -3px;
+				left: 2px;
+			}
+			.rightEye {
+				left: 11px;
+			}
 		</style>
 	</head>
 	<body>
@@ -138,8 +191,8 @@
 					this.cont = true;
 					this.step = 1;
 					this.block = 20;
-					this.left = 20;
-					this.top = 20;
+					this.left = 100;
+					this.top = 140;
 					this.prev = '';
 					this.board = [
 						[1,1,1,1,1,1,1,1,1,1,1],
@@ -167,6 +220,7 @@
 						40: 'down',
 						38: 'up'
 					};
+					this.ghosts = ['blinky'];
 					
 					this.init();
 					this.events();
@@ -294,6 +348,9 @@
 						this.animationId = requestAnimationFrame(() => this.go(dir));
 					}
 				}
+				ghostFactory(ghostList) {
+					ghostList.forEach(this.renderGhost);
+				}
 				events() {
 					document.addEventListener('keydown', e => {
 						const dir = this.keyCode[e.keyCode];
@@ -319,8 +376,8 @@
 							this.cont = true;
 							this.step = 1;
 							this.block = 20;
-							this.left = 20;
-							this.top = 20;
+							this.left = 100;
+							this.top = 140;
 							this.prev = '';
 							this.board = JSON.parse(this.initBoard);
 							this.init();
@@ -332,6 +389,14 @@
 					let tpl = '<div id="pac"></div>';
 					$container.insertAdjacentHTML('beforeend', tpl);
 				}
+				renderGhost(name) {
+					const $container = document.getElementById('container');
+					let tpl = `<div id="${name}" class="ghost">
+						<div class="leftEye"></div>
+						<div class="rightEye"></div>
+					</div>`;
+					$container.insertAdjacentHTML('beforeend', tpl);
+				}				
 				renderBoard() {
 					const max = this.board.length;
 					let tpl = ``;
@@ -356,6 +421,7 @@
 					console.log('Started.');
 					this.renderBoard();
 					this.renderPac();
+					this.ghostFactory(this.ghosts);
 				}
 			}
 			new Pacman();
