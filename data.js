@@ -112,7 +112,9 @@ var DATA = {
 		{quote: 'It\'s the game of life. Do I win or do I lose? One day they\'re gonna shut the game down. I gotta have as much fun and go around the board as many times as I can before it\'s my turn to leave', auth: 'Tupac Shakur'}, 
 		{quote: 'Reality is wrong. Dreams are for real', auth: 'Tupac Shakur'},
 		{quote: 'We\'re having too good a time today. We ain\'t thinking about tomorrow', auth: 'John Dillinger'},
-		{quote: 'Are you not entertained?', auth: 'Maximus Decimus Meridius'},		
+		{quote: 'Are you not entertained?', auth: 'Maximus Decimus Meridius'},
+		{quote: 'People would rather believe than know', auth: 'Edward O Wilson'},
+		{quote: 'How can you prove whether at this moment we are sleeping, and all our thoughts are a dream; or whether we are awake, and talking to one another in the waking state?', auth: 'Plato'},		
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
