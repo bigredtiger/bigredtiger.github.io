@@ -224,6 +224,7 @@ var DATA = {
 		{photo: 'mohegan.jpg', desc: 'Chill\'in in my 2nd home, Winter 2017.'},
 		{photo: 'blackandtan.jpg', desc: 'Enjoying a cold one at my trusty bar, Spring 2017.'},
 		{photo: 'office.jpg', desc: 'Wow, finally getting my own office, Summer 2017.'},
+		{photo: 'hiway.jpg', desc: 'Crus\'in down highway with a Ferrari, Summer 2018.'},
 		{photo: 'limo.jpg', desc: 'Here\'s to you and the good life.'}
 	],
 	games: [
