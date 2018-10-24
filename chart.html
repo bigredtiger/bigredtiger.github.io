@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="chartApp">
+  <head>
+  	<meta charset="utf-8">
+	<style>
+		body {
+			font-family: verdana, sans-serif;
+			font-size: 12px;
+		}
+		h1 {
+			font-size: 1.3rem;
+		}
+		.formContainer {
+			float: left;
+		}
+		#chartContainer {
+			float: left;
+		}
+		label {
+			display: block;
+			margin-bottom: 3px;
+		}
+		.alloc {
+			width: 30px;
+			padding: 6px;
+		}
+		.row {
+			margin-bottom: 10px;
+		}
+	</style>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.angularjs.org/1.7.5/angular.min.js"></script>
+  </head>
+  <body ng-controller="mainCtrl">
+	<h1>Asset Manager</h1>
+    <div class="formContainer">
+		<div class="row"><label>Equity</label> <input type="text" ng-model="equity" name="equity" class="alloc"> %</div>
+		<div class="row"><label>Fixed Income</label> <input type="text" ng-model="fixedIncome" name="fixedIncome" class="alloc"> %</div>
+		<div class="row"><label>Commodities</label> <input type="text" ng-model="commodities" name="commodities" class="alloc"> %</div>
+		<div class="row"><label>Real Estate</label> <input type="text" ng-model="realEstate" name="realEstate" class="alloc"> %</div>
+		<div class="row"><label>Cash</label> <input type="text" ng-model="cash" name="cash" class="alloc"> %</div>
+	</div>
+	<div id="chartContainer">
+		<pie-chart
+			equity="equity"
+			fixed-income="fixedIncome"
+			commodities="commodities" 
+			real-estate="realEstate"
+			cash="cash"
+		></pie-chart>
+	</div>
+    <script>
+      angular.module('chartApp', [])
+        .controller('mainCtrl', function($scope) {
+			$scope.equity = 60;
+			$scope.fixedIncome = 20;
+			$scope.commodities = 10;
+			$scope.realEstate = 8;
+			$scope.cash = 2;
+        })
+		.component('pieChart', {
+			template: '<div id="chart"></div>',
+			bindings: {
+				equity: '<',
+				fixedIncome: '<',
+				commodities: '<',
+				realEstate: '<',
+				cash: '<'
+			},
+			controller: function() {
+				let chart;
+				let equity = 0, fixedIncome = 0, commodities = 0, realEstate = 0, cash = 0;
+				
+				this.$onInit = function() {
+					equity = parseInt(this.equity, 10);
+					fixedIncome = parseInt(this.fixedIncome, 10);
+					commodities = parseInt(this.commodities, 10);
+					realEstate = parseInt(this.realEstate, 10);
+					cash = parseInt(this.cash, 10);
+				}
+				this.$postLink = function() {
+				
+					chart = Highcharts.chart('chart', {
+						chart: {
+							plotBackgroundColor: null,
+							plotBorderWidth: null,
+							plotShadow: false,
+							type: 'pie'
+						},
+						title: {
+							text: null
+						},
+						tooltip: {
+							pointFormat: '<b>{point.percentage:.1f}%</b>'
+						},
+						plotOptions: {
+							pie: {
+								allowPointSelect: true,
+								cursor: 'pointer',
+								dataLabels: {
+									enabled: false
+								},
+								showInLegend: true
+							}
+						},
+						series: [{
+							name: 'Asset',
+							colorByPoint: true,
+							data: [
+								{
+									name: 'Equity',
+									y: equity,
+									sliced: true,
+									selected: true
+								},
+								{
+									name: 'Fixed Income',
+									y: fixedIncome
+								},
+								{
+									name: 'Commodities',
+									y: commodities
+								},
+								{
+									name: 'Real Estate',
+									y: realEstate
+								},
+								{
+									name: 'Cash',
+									y: cash
+								}
+							]
+						}]
+					});
+				};
+				this.$onChanges = function() {
+					equity = parseInt(this.equity, 10);
+					fixedIncome = parseInt(this.fixedIncome, 10);
+					commodities = parseInt(this.commodities, 10);
+					realEstate = parseInt(this.realEstate, 10);
+					cash = parseInt(this.cash, 10);
+					
+					if (chart) {
+						chart.update({ series: [{ data: [{ y: equity, }, { y: fixedIncome }, { y: commodities }, { y: realEstate }, { y: cash }]}]});
+					}
+				};
+			}
+		});
+		
+	
+    </script>
+  </body>
+</html>
