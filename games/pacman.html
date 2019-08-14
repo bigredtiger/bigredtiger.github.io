@@ -191,8 +191,6 @@
 					this.cont = true;
 					this.step = 1;
 					this.block = 20;
-					this.left = 100;
-					this.top = 140;
 					this.prev = '';
 					this.board = [
 						[1,1,1,1,1,1,1,1,1,1,1],
@@ -221,22 +219,30 @@
 						38: 'up'
 					};
 					this.ghosts = ['blinky'];
+					this.pac = {
+						top: 140,
+						left: 100
+					};
+					this.blinky = {
+						top: 140,
+						left: 100
+					};
 					
 					this.init();
 					this.events();
 				}
-				isPortal(dir) {
-					if (Math.ceil(this.left/this.block) === this.board[0].length && dir === 'right') {
-						this.left = 0;
-					} else if (Math.floor(this.left/this.block) < 0 && dir === 'left') {
-						this.left = (this.board[0].length - 1) * this.block;
+				isPortal(dir, elemKey) {
+					if (Math.ceil(this[elemKey].left/this.block) === this.board[0].length && dir === 'right') {
+						this[elemKey].left = 0;
+					} else if (Math.floor(this[elemKey].left/this.block) < 0 && dir === 'left') {
+						this[elemKey].left = (this.board[0].length - 1) * this.block;
 					}
 				}
-				isBarrier(dir) {
-					const posLeft = this.left;
-					const posTop = this.top;
+				isBarrier(dir, elemKey) {
+					const posLeft = this[elemKey].left;
+					const posTop = this[elemKey].top;
 					
-					this.isPortal(dir);
+					this.isPortal(dir, elemKey);
 					
 					switch(dir) {
 						case 'right':
@@ -276,76 +282,87 @@
 						}
 					}
 				}				
-				setPacView(dir, elem) {
-					elem.className = dir;
+				setPacView(dir, elem, elemKey) {
+					if (elemKey === 'pac') {
+						console.log(elem);
+						elem.className = dir;
+					}
 				}
-				setPathView(pos, dir) {
-					if (((dir === 'right' || dir === 'down') && !(Math.ceil(pos) % 10)) || ((dir === 'left' || dir === 'up') && !(Math.floor(pos) % 10))) {
-						let top, left;
-						
-						if (dir === 'right' || dir === 'left') {
-							top = Math.round(this.top/this.block);
-							left = dir === 'right' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);	
-						} else {
-							left = Math.round(this.left/this.block);
-							top = dir === 'down' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);					
-						}
-						document.querySelector(`.row:nth-child(${top + 1}) .path:nth-child(${left + 1})`).className = 'path clear';
-						this.board[top][left] = -1;
-						
-						if (!this.win && this.isWin()) {
-							this.win = true;
-							this.setWinBoard();
+				setPathView(pos, dir, elemKey) {
+					if (elemKey === 'pac') {
+						if (((dir === 'right' || dir === 'down') && !(Math.ceil(pos) % 10)) || ((dir === 'left' || dir === 'up') && !(Math.floor(pos) % 10))) {
+							let top, left;
+							
+							if (dir === 'right' || dir === 'left') {
+								top = Math.round(this.pac.top/this.block);
+								left = dir === 'right' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);	
+							} else {
+								left = Math.round(this.pac.left/this.block);
+								top = dir === 'down' ? Math.ceil(pos/this.block) : Math.floor(pos/this.block);					
+							}
+							document.querySelector(`.row:nth-child(${top + 1}) .path:nth-child(${left + 1})`).className = 'path clear';
+							this.board[top][left] = -1;
+							
+							if (!this.win && this.isWin()) {
+								this.win = true;
+								this.setWinBoard();
+							}
 						}
 					}
 				}
-				go(dir) {						
-					if (!this.isBarrier(dir) && this.cont) {
+				getBool(elemKey) {
+					if (elemKey === 'pac') {
+						return this.cont;
+					} else {
+						return true;
+					}
+				}
+				go(dir, elemKey) {						
+					if (!this.isBarrier(dir, elemKey) && this.getBool(elemKey)) {
 						
-						const $pac = document.getElementById('pac');
+						const elem = document.getElementById(elemKey);
 						
-						//console.log(this.top, this.left);
-						this.setPacView(dir, $pac);
+						this.setPacView(dir, elem, elemKey);
 						switch(dir) {
 							case 'right':
-								this.setPathView(this.left, dir);
-								this.top = Math.floor(this.top / 10) * 10;
-								this.top % this.block ? this.top = this.top + 10 : this.top;
-								this.left += this.step;
-								$pac.style.marginTop = `${this.top}px`;
-								$pac.style.marginLeft = `${this.left}px`;
+								this.setPathView(this[elemKey].left, dir, elemKey);
+								this[elemKey].top = Math.floor(this[elemKey].top / 10) * 10;
+								this[elemKey].top % this.block ? this[elemKey].top = this[elemKey].top + 10 : this[elemKey].top;
+								this[elemKey].left += this.step;
+								elem.style.marginTop = `${this[elemKey].top}px`;
+								elem.style.marginLeft = `${this[elemKey].left}px`;
 								break;
 							case 'left':
-								this.setPathView(this.left, dir);
-								this.top = Math.ceil(this.top / 10) * 10;
-								this.top % this.block ? this.top = this.top - 10 : this.top;
-								this.top % this.block && this.prev === 'down' ? this.top = this.top + 10 : 
-									this.top % this.block && this.prev === 'up' ? this.top = this.top - 10 : this.top;
-								//console.log('duh', this.top, this.left, this.top % this.block, this.prev);
-								this.left -= this.step;
-								$pac.style.marginTop = `${this.top}px`;
-								$pac.style.marginLeft = `${this.left}px`;
+								this.setPathView(this[elemKey].left, dir, elemKey);
+								this[elemKey].top = Math.ceil(this[elemKey].top / 10) * 10;
+								this[elemKey].top % this.block ? this[elemKey].top = this[elemKey].top - 10 : this[elemKey].top;
+								this[elemKey].top % this.block && this.prev === 'down' ? this[elemKey].top = this[elemKey].top + 10 : 
+									this[elemKey].top % this.block && this.prev === 'up' ? this[elemKey].top = this[elemKey].top - 10 : this[elemKey].top;
+								//console.log('duh', this[elemKey].top, this[elemKey].left, this[elemKey].top % this.block, this.prev);
+								this[elemKey].left -= this.step;
+								elem.style.marginTop = `${this[elemKey].top}px`;
+								elem.style.marginLeft = `${this[elemKey].left}px`;
 								break;
 							case 'up':
-								this.setPathView(this.top, dir);
-								this.left = Math.ceil(this.left / 10) * 10;
-								this.left % this.block ? this.left = this.left - 10 : this.left;
-								//console.log('duh', this.top, this.left);
-								this.top -= this.step;
-								$pac.style.marginTop = `${this.top}px`;
-								$pac.style.marginLeft = `${this.left}px`;
+								this.setPathView(this[elemKey].top, dir, elemKey);
+								this[elemKey].left = Math.ceil(this[elemKey].left / 10) * 10;
+								this[elemKey].left % this.block ? this[elemKey].left = this[elemKey].left - 10 : this[elemKey].left;
+								//console.log('duh', this[elemKey].top, this[elemKey].left);
+								this[elemKey].top -= this.step;
+								elem.style.marginTop = `${this[elemKey].top}px`;
+								elem.style.marginLeft = `${this[elemKey].left}px`;
 								break;
 							case 'down':
-								this.setPathView(this.top, dir);
-								this.left = Math.floor(this.left / 10) * 10;
-								this.left % this.block ? this.left = this.left + 10 : this.left;
-								this.top += this.step;
-								$pac.style.marginTop = `${this.top}px`;
-								$pac.style.marginLeft = `${this.left}px`;
+								this.setPathView(this[elemKey].top, dir, elemKey);
+								this[elemKey].left = Math.floor(this[elemKey].left / 10) * 10;
+								this[elemKey].left % this.block ? this[elemKey].left = this[elemKey].left + 10 : this[elemKey].left;
+								this[elemKey].top += this.step;
+								elem.style.marginTop = `${this[elemKey].top}px`;
+								elem.style.marginLeft = `${this[elemKey].left}px`;
 								break;								
 						}
 						this.prev = dir;
-						this.animationId = requestAnimationFrame(() => this.go(dir));
+						this.animationId = requestAnimationFrame(() => this.go(dir, elemKey));
 					}
 				}
 				ghostFactory(ghostList) {
@@ -359,16 +376,16 @@
 							if (this.animationId) {
 								cancelAnimationFrame(this.animationId);
 								this.cont = false;
-								if (this.isBarrier(dir)) {
+								if (this.isBarrier(dir, 'pac')) {
 									this.cont = true;
-									this.go(this.prev);
+									this.go(this.prev, 'pac');
 								} else {
 									this.cont = true;
-									this.go(dir);
+									this.go(dir, 'pac');
 								}
 							} else {
 								this.cont = true;
-								this.go(dir);
+								this.go(dir, 'pac');
 							}
 						} else if (e.keyCode === 13) {
 							this.win = false;
@@ -376,8 +393,6 @@
 							this.cont = true;
 							this.step = 1;
 							this.block = 20;
-							this.left = 100;
-							this.top = 140;
 							this.prev = '';
 							this.board = JSON.parse(this.initBoard);
 							this.init();
@@ -422,6 +437,7 @@
 					this.renderBoard();
 					this.renderPac();
 					this.ghostFactory(this.ghosts);
+					this.go('left', 'blinky');
 				}
 			}
 			new Pacman();
