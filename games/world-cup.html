@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>World Cup</title>
+		<style>
+			body {
+				background-color: #000;
+				color: cyan;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				display: flex;
+				justify-content: center;
+				align-items: flex-start;
+				height: 93vh;
+				margin: 0;				
+			}
+			
+			#container {
+				display: flex;
+				flex-direction: column;
+				flex: 100%;
+			}
+			
+			h1 {
+				font-size: 2rem;
+				flex: 100%;
+				margin: 1% 1% 0 1%;
+				font-weight: normal;
+				font-style: italic;
+				color: white;
+				border-top: 1px double #888;
+			}
+			
+			.lang:after {
+				color: red;
+				font-size: 1.3rem;
+				content: " \4e16 \754c \676f";
+				vertical-align: super;
+			}
+			
+			#new:after {
+				color: red;
+				font-size: 1.3rem;
+				content: "\26bd\fe0e";
+				vertical-align: super;
+				cursor: pointer;
+			}
+			
+			#random:after {
+				color: gold;
+				font-size: 1.3rem;
+				content: "\26bd\fe0e";
+				vertical-align: super;
+				cursor: pointer;
+			}
+			
+			#game {
+				flex: 100%;
+				display: flex;
+			}
+			
+			.time-box {
+				flex: 34%;
+				white-space: nowrap;
+				display: flex;
+				align-items: center;
+			}
+			
+			#time {
+				font-size: 4.8rem;
+				font-style: italic;
+				flex: 1;
+				text-align: right;
+			}
+			
+			.time-container {
+				flex: .48;
+			}
+			
+			#stoppage {
+				font-size: 2.8rem;
+				color: green;
+				font-style: italic;
+				vertical-align: top;
+				height: 54px;
+			}
+			
+			#et {
+				font-size: 1.3rem;
+				font-style: italic;
+				letter-spacing: 8px;
+				visibility: hidden;
+				margin-left: 8px;
+			}
+			
+			.score-box {
+				font-style: italic;
+				flex: 33%;
+				text-align: center;
+			}
+			
+			#score, #score2 {
+				font-size: 3rem;
+				font-weight: bold;
+			}
+			
+			.final {
+				color: orange;
+			}
+			
+			#pk {
+				flex: .3;
+				border-collapse: collapse;
+				display: table-cell;
+				border: 0;/*1px solid;*/
+			}
+			
+			#pk td {
+				padding: 0;
+				border-bottom: 0;/*1px solid;*/
+				border-right: 0;/*1px solid;*/
+			}
+			
+			.goal {
+				width: 10px;
+				height: 10px;
+				border-radius: 10px;
+				background-color: #000;
+				margin: 3px;
+			}
+			
+			#country {
+				font-size: 1rem;
+				color: lightgreen;				
+			}
+			
+			#country2 {
+				font-size: 1rem;
+				color: red;
+			}
+			
+			#groups {
+				flex: 100%;
+				display: flex;
+				flex-wrap: wrap;
+				margin-left: 1%;
+			}
+			
+			.group-grid {
+				border-collapse: collapse;
+				flex: 23%;
+				/* flex: 48%; */
+				margin: 0 1% 1% 0;
+			}
+			
+			.group-grid th {
+				border-bottom: 1px solid #888;
+				color: #888;
+				text-align: left;
+				font-weight: normal;
+			}
+			
+			#bracket {
+				flex: 100%;
+				display: flex;
+				flex-wrap: wrap;
+				margin: 0 1%;
+			}
+			
+			.round {
+				display: flex;
+				margin-right: 1%;
+				align-items: center;
+			}
+			
+			.round-teams {
+				flex: 1;
+				margin-right: 6px;
+			}
+			
+			.round-scores {
+				flex: 1;
+			}
+			
+			.round-score {
+				color: cyan;
+				white-space: nowrap;
+			}
+
+			.show-winner {
+				visibility: hidden;
+			}
+			.show-winner:after {
+				content: "\25c0";
+				color: orange;
+				margin-right: 6px;
+			}
+			
+			.round-team {
+				white-space: nowrap;
+				line-height: 16px;
+			}
+			
+			.round-team.bottom0, .show-winner.bottom0 {
+				margin-bottom: 10px;
+			}
+			
+			#r1 {
+				align-items: flex-start;
+				margin-top: 26px;
+			}
+			
+			.round-team.bottom1, .show-winner.bottom1 {
+				margin-bottom: 52px;
+			}
+			
+			.round-team.bottom1:nth-child(4), .show-winner.bottom1:nth-child(4) {
+				margin-bottom: 52px;
+			}
+			
+			#r2 {
+				align-items: flex-start;
+				margin-top: 68px;
+			}
+			
+			.round-team.bottom2, .show-winner.bottom2 {
+				margin-bottom: 136px;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<section id="container">
+			<h1>World Cup 2018
+				<span class="lang"></span>
+				<span id="new"></span>
+				<span id="random"></span>
+			</h1>
+			<div id="game">
+				<div class="score-box">
+					<div id="score">0</div>
+					<div id="country">Brazil</div>
+				</div>	
+				<div class="time-box">
+					<span id="time"></span>
+					<div class="time-container">
+						<div id="stoppage"></div>
+						<div id="et">ET</div>
+					</div>
+					<table id="pk">
+						<tr>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+						</tr>
+						<tr>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+							<td><div class="goal"></div></td>
+						</tr>
+					</table>
+				</div>
+				<div class="score-box">
+					<div id="score2">0</div>
+					<div id="country2">Russia</div>
+				</div>
+			</div>
+			<div id="groups"></div>
+			<div id="bracket"></div>
+		</section>
+		
+		<script type="module">
+			import { el, rand, sleep, qry, qryAll, log } from './lib.js';
+			
+			const data = [
+				{
+					country: 'Uruguay',
+					color: 'white',
+					odds: 9
+				},
+				{
+					country: 'Russia',
+					color: 'red',
+					odds: 6
+				},
+				{
+					country: 'Saudi Arabia',
+					color: 'green',
+					odds: 3
+				},
+				{
+					country: 'Egypt',
+					color: 'yellow',
+					odds: 3
+				},
+				{
+					country: 'Spain',
+					color: 'red',
+					odds: 8
+				},
+				{
+					country: 'Portugal',
+					color: 'red',
+					odds: 7
+				},
+				{
+					country: 'Iran',
+					color: 'green',
+					odds: 2
+				},
+				{
+					country: 'Morocco',
+					color: 'red',
+					odds: 3
+				},
+				{
+					country: 'France',
+					color: 'white',
+					odds: 10
+				},
+				{
+					country: 'Denmark',
+					color: 'red',
+					odds: 1
+				},
+				{
+					country: 'Peru',
+					color: 'red',
+					odds: 1
+				},
+				{
+					country: 'Australia',
+					color: 'yellow',
+					odds: 3
+				},
+				{
+					country: 'Croatia',
+					color: 'red',
+					odds: 10
+				},
+				{
+					country: 'Argentina',
+					color: 'lightblue',
+					odds: 7
+				},
+				{
+					country: 'Nigeria',
+					color: 'green',
+					odds: 2
+				},
+				{
+					country: 'Iceland',
+					color: 'royalblue',
+					odds: 3
+				},
+				{
+					country: 'Brazil',
+					color: 'lightgreen',
+					odds: 9
+				},
+				{
+					country: 'Switzerland',
+					color: 'white',
+					odds: 5
+				},
+				{
+					country: 'Serbia',
+					color: 'royalblue',
+					odds: 3
+				},
+				{
+					country: 'Costa Rica',
+					color: 'red',
+					odds: 1
+				},
+				{
+					country: 'Sweden',
+					color: 'yellow',
+					odds: 6
+				},
+				{
+					country: 'Mexico',
+					color: 'green',
+					odds: 6
+				},
+				{
+					country: 'South Korea',
+					color: 'white',
+					odds: 4
+				},
+				{
+					country: 'Germany',
+					color: 'white',
+					odds: 9
+				},
+				{
+					country: 'Belgium',
+					color: 'red',
+					odds: 10
+				},
+				{
+					country: 'England',
+					color: 'white',
+					odds: 7
+				},
+				{
+					country: 'Tunisia',
+					color: 'red',
+					odds: 2
+				},
+				{
+					country: 'Panama',
+					color: 'royalblue',
+					odds: 1
+				},
+				{
+					country: 'Colombia',
+					color: 'yellow',
+					odds: 6
+				},
+				{
+					country: 'Japan',
+					color: 'dodgerblue',
+					odds: 7
+				},
+				{
+					country: 'Senegal',
+					color: 'yellow',
+					odds: 2
+				},
+				{
+					country: 'Poland',
+					color: 'white',
+					odds: 1
+				}
+			];
+
+			(function(data) {
+				const step = 0;
+				let time = 0;
+				let totalTime = time + 90;
+				let stoppage = 0;
+				const game = {};
+				let top = [], top2 = [], bottom = [], bottom2 = [];
+				let isDone = false;
+				let teams = data;
+				let pkBoard = [[], []];
+				
+				const renderTime = (min) => {
+					const minStr = `${min}`.padStart(2, '0');
+					const node = el('time');
+							
+					if (min  >= 60) {
+						const minStr = `${min - 60}`.padStart(2, '0');
+						
+						node.insert(`1:${minStr}`);
+					} else {
+						node.insert(`0:${minStr}`);
+					}
+				};
+				
+				const play = (isEt) => {
+					let goals = game.teams.map((item, i) => {
+						let val = rand(0, teams[item].odds);
+						
+						if (isEt) {
+							val = game.score[i] + (teams[item].odds % (val ? val : 1));
+						}
+
+						renderPlayScore(item, i, val);
+						
+						return val;
+					});
+					
+					if (isEt) {
+						game.et = game.score.slice();
+					} else {
+						game.et = [];
+					}
+					
+					game.score = goals;
+				};
+				
+				const isDraw = () => game.score[0] === game.score[1];
+								
+				const startGame = (isEt)  => {
+					if (!isEt) {
+						renderToggleScores();
+						el('et').style('visibility', 'hidden');
+					} else {
+						el('et').style('visibility', 'visible');
+					}
+					el('stoppage').insert('');
+					time = 0;
+					totalTime =  isEt ? 30 : 90;
+					stoppage = 0;
+					play(isEt);
+					renderTime(time);
+					
+					return new Promise(resolve => {
+						const timer = setInterval(() => {
+							time++;
+					
+							if (time <= totalTime) {
+								renderTime(time);
+							} else if (!stoppage) {
+								stoppage = stoppage + rand(0, 20);
+								totalTime = totalTime + stoppage;
+								el('stoppage').insert(`+${stoppage}`);
+								renderTime(time);
+							} else {
+								clearInterval(timer);
+								resolve();
+							}
+						}, step);
+					});
+				};
+				
+				const shuffle = (array) => {
+					let currentIndex = array.length, temporaryValue;
+
+					while (0 !== currentIndex) {
+						const randomIndex = Math.floor(Math.random() * currentIndex);
+						
+						currentIndex -= 1;
+						temporaryValue = array[currentIndex];
+						array[currentIndex] = array[randomIndex];
+						array[randomIndex] = temporaryValue;
+					}
+
+					return array;
+				};
+				
+				const groupPlay = async (min, max) => {
+					let diff = 1;
+					
+					for (let i = min; i < max; i++) {
+						for (let j = min + diff; j < max; j++) {
+							game.teams = [i, j];
+							await startGame();
+							updateGroupScores();
+						}
+						diff++;
+					}
+					
+					findGroupWinners(min, max);
+					
+					return Promise.resolve();
+				};
+				
+				const updateGroupScores = () => {
+					const { score } = game;
+					
+					teams[game.teams[0]].groupData[0] = teams[game.teams[0]].groupData[0] + 1;
+					teams[game.teams[1]].groupData[0] = teams[game.teams[1]].groupData[0] + 1;
+					
+					if (score[0] > score[1]) {
+						teams[game.teams[0]].groupData[1] = teams[game.teams[0]].groupData[1] + 1;
+						teams[game.teams[1]].groupData[3] = teams[game.teams[1]].groupData[3] + 1;
+						teams[game.teams[0]].groupData[4] = teams[game.teams[0]].groupData[4] + score[0];
+						teams[game.teams[1]].groupData[5] = teams[game.teams[1]].groupData[5] + score[1];
+						teams[game.teams[0]].groupData[7] = teams[game.teams[0]].groupData[7] + 3;
+						game.win = 0;
+					} else if (score[0] < score[1]) {
+						teams[game.teams[1]].groupData[1] = teams[game.teams[1]].groupData[1] + 1;
+						teams[game.teams[0]].groupData[3] = teams[game.teams[0]].groupData[3] + 1;
+						teams[game.teams[1]].groupData[4] = teams[game.teams[1]].groupData[4] + score[1];
+						teams[game.teams[0]].groupData[5] = teams[game.teams[0]].groupData[5] + score[0];
+						teams[game.teams[1]].groupData[7] = teams[game.teams[1]].groupData[7] + 3;
+						game.win = 1;
+					} else {
+						teams[game.teams[0]].groupData[2] = teams[game.teams[0]].groupData[2] + 1;
+						teams[game.teams[1]].groupData[2] = teams[game.teams[1]].groupData[2] + 1;
+						teams[game.teams[0]].groupData[4] = teams[game.teams[0]].groupData[4] + score[0];
+						teams[game.teams[0]].groupData[5] = teams[game.teams[0]].groupData[5] + score[1];
+						teams[game.teams[1]].groupData[4] = teams[game.teams[1]].groupData[4] + score[1];
+						teams[game.teams[1]].groupData[5] = teams[game.teams[1]].groupData[5] + score[0];
+						teams[game.teams[0]].groupData[7] = teams[game.teams[0]].groupData[7] + 1;
+						teams[game.teams[1]].groupData[7] = teams[game.teams[1]].groupData[7] + 1;
+						game.win = -1;
+					}
+					
+					teams[game.teams[0]].groupData[6] = teams[game.teams[0]].groupData[4] - teams[game.teams[0]].groupData[5];
+					teams[game.teams[1]].groupData[6] = teams[game.teams[1]].groupData[4] - teams[game.teams[1]].groupData[5];					
+					
+					renderToggleScores();
+					renderGroupScores();
+				};
+				
+				const findGroupWinners = (min, max) => {
+					const group = teams.slice(min, max);
+					const saved = teams.slice(min, max);
+
+					group.sort((a, b) => b.groupData[7] - a.groupData[7]);
+					
+					let i1 = saved.findIndex(item => item.groupData[7] === group[0].groupData[7]);
+					let i2 = saved.findIndex((item, i) => i !== i1 && item.groupData[7] === group[1].groupData[7]);					
+					
+					const items = saved.filter((item, i) => {
+						return item.groupData[7] === group[0].groupData[7];
+					});
+					
+					if (items.length > 2) {
+						items.sort((a, b) => b.groupData[6] - a.groupData[6]);
+						
+						i1 = saved.findIndex(item => item.groupData[6] === items[0].groupData[6]);
+						i2 = saved.findIndex((item, i) => i !== i1 && item.groupData[6] === items[1].groupData[6]);	
+					} else {
+						const items2 = saved.filter((item, i) => {
+							return i !== i1 && item.groupData[7] === group[1].groupData[7];
+						});
+					
+						if (items2.length > 1) {
+							items2.sort((a, b) => b.groupData[6] - a.groupData[6]);
+							
+							i2 = saved.findIndex(item => item.groupData[6] === items2[0].groupData[6]);
+						}
+					}
+					
+					highlightGroupWinners(min, i1, i2);
+					initBracket(saved[i1], saved[i2]);
+				};
+				
+				const groupStage = async () => {
+					const times = teams.length / 4;
+					let i = 0;
+					let min = 0;
+					let max = 4;
+					
+					while (i < times) {
+						await groupPlay(min, max);	
+						min = min + 4;
+						max = max + 4;
+						i++;
+					}
+					
+					return Promise.resolve();
+				};
+				
+				const initBracket = (team, team2) => {
+					if (team.group % 2 === 0) {
+						top.push(team.id);
+					} else {
+						top2.push(team.id);
+					}
+					
+					if (team2.group % 2 !== 0) {
+						bottom.push(team2.id);
+					} else {
+						bottom2.push(team2.id);
+					}
+				};
+				
+				const createBracket = () => {
+					top = top.concat(top2);
+					bottom = bottom.concat(bottom2);
+					top2 = [];
+					bottom2 = [];
+				};
+				
+				const kick = async (isSd) => {
+					let cnt = 0;
+					
+					renderPlayScore(null, 0, game.score[0]);
+					renderPlayScore(null, 1, game.score[1]);
+					await sleep(1);
+					
+					while (cnt < 5) {
+						const goals = game.teams.map((item) => rand(0, teams[item].odds));
+
+						pkBoard[0][cnt] = 0;
+						pkBoard[1][cnt] = 0;
+							
+						if (goals[0] > 2) {
+							pkBoard[0][cnt] = 1;
+							game.score[0] = game.score[0] + 1;
+						} 
+
+						if (goals[1] > 2) {
+							pkBoard[1][cnt] = 1;
+							game.score[1] = game.score[1] + 1;
+						}
+
+						renderPkBoard();
+						renderPlayScore(null, 0, game.score[0]);
+						renderPlayScore(null, 1, game.score[1]);
+						
+						await sleep(1);
+						
+						const diff = Math.abs(game.score[0] - game.score[1]);
+						
+						if (isSd && diff >= 1) {
+							break;
+						}
+						
+						if ((cnt === 2 && diff >= 3) || (cnt === 3 && diff >= 2)) {
+							break;
+						}
+
+						cnt++;
+					}
+					
+					return Promise.resolve();
+				};
+				
+				const pkStage = async (i, j, isSd) => {
+					game.pk = game.score.slice();
+					game.score = [i, j];
+					pkBoard = [[], []];
+					togglePkBoard();
+					await kick(isSd);
+	
+					if (top.length !== 1 || isDraw()) {
+						togglePkBoard();
+					}
+					
+					if (isDraw()) {
+						await pkStage(game.score[0], game.score[1], true);
+					} else {
+						return Promise.resolve();					
+					}					
+				};
+				
+				const knockoutStage = async (round) => {	
+					renderBracket(round);
+					
+					for (let i = 0; i < top.length; i++) {
+						game.pk = [];						
+						game.teams = [top[i], bottom[i]];
+						await startGame();
+						// game.score[0] = 1;
+						// game.score[1] = 1;
+						if (isDraw()) {
+							log('was:', game.score[0], game.score[1])
+							await startGame(true);
+							// game.score[0] = 3;
+							// game.score[1] = 3;
+							log('now:', game.score[0], game.score[1])
+						}
+						
+						if (isDraw()) {
+							await pkStage(0, 0);
+						}
+						updateRoundScores(round, i);
+					}
+					
+						top = top2;
+						bottom = bottom2;
+						top2 = [];
+						bottom2 = [];						
+						round++;
+					
+					if (top.length && bottom.length) {
+						knockoutStage(round);
+					} else {
+						let i;
+						
+						if (top.length) {
+							i = top[0];
+						} else {
+							i = bottom[0];
+						}
+						
+						renderLastBracket(round, i);
+						top = [];
+						bottom = [];
+						isDone = true;
+					}
+				};
+				
+				const updateRoundScores = (round, i) => {
+					const { score, et, pk } = game;
+
+					const a = score[0] > score[1];
+					const b = score[0] < score[1];
+					const t = score[0] === score[1];
+					let s = score[0];
+					let s2 = score[1];
+					let winner;
+					let scoreTxt;
+					
+					switch(true) {
+						case a:
+							game.win = 0;						
+							winner = top[i];
+							highlightRoundWinner(round, 2 * i);
+							s = highlightRoundScore(s);
+							break;
+						case b:
+							game.win = 1;
+							winner = bottom[i];
+							highlightRoundWinner(round, 2 * i + 1);
+							s2 = highlightRoundScore(s2);
+							break;
+						default:
+							game.win = -1;
+							console.log('tie', score[0], score[1]);
+					}
+					
+					if (i % 2 === 0) {
+						top2.push(winner);
+					} else {
+						bottom2.push(winner);
+					}
+					
+					if (pk.length) {
+						scoreTxt = `${et[0]} - ${et[1]} (${pk[0]} - ${pk[1]} ET) (${s} - ${s2} PK)`;
+					 } else if (et.length) {
+						scoreTxt = `${et[0]} - ${et[1]} (${s} - ${s2} ET)`;
+					} else {
+						scoreTxt = `${s} - ${s2}`;;
+					}
+					
+					renderToggleScores();
+					renderRoundScore(round, i, scoreTxt);
+				};
+				
+				const renderPkBoard = () => {
+					pkBoard[0].forEach((item, i) => {
+						if (item) {
+							qryAll('.goal', i).style('backgroundColor', 'gold');
+						}
+						
+						if (pkBoard[1][i]) {
+							qryAll('.goal', i + 5).style('backgroundColor', 'gold');
+						}
+					});
+				};
+				
+				const togglePkBoard = () => {
+					document.querySelectorAll('.goal').forEach(item => {
+						if (item.style.backgroundColor === 'rgb(0, 0, 0)' || item.style.backgroundColor === '') {
+							return item.style.backgroundColor = '#888';					
+						} else {
+							return item.style.backgroundColor = '#000';						
+						}
+					});
+				};
+
+				const highlightRoundScore = (n) => `<span style="color: orange">${n}</span>`;
+				
+				const highlightRoundWinner = (round, i) => qryAll(`#r${round} .show-winner`, i).style('visibility', 'visible');
+			
+				const renderRoundScore = (round, i, score) => qryAll(`#r${round} .round-score`, i).insert(score);
+				
+				const renderBracket = (round) => {
+					let roundTpl = `<div class="round" id="r${round}"><div class="round-teams">`;
+					
+					top.forEach((item, i) => {
+						roundTpl = `${roundTpl}
+							<div class="round-team" style="color: ${teams[item].color}">${teams[item].country}</div>
+							<div class="round-team${i < top.length - 1 ? ' bottom' + round : ''}" style="color: ${teams[bottom[i]].color}">${teams[bottom[i]].country}</div>`;
+					});
+					
+					roundTpl = `${roundTpl}</div><div class="round-scores">`;
+					
+					top.forEach((item, i) => {
+						roundTpl = `${roundTpl}
+							<div><span class="show-winner"></span><span class="round-score">0 - 0</span></div>
+							<div class="show-winner${i < top.length - 1 ? ' bottom' + round : ''}"></div>`;
+					});
+					
+					roundTpl = `${roundTpl}</div></div>`;
+					
+					el('bracket').append(roundTpl);
+				};
+				
+				const renderLastBracket = (round, i) => {
+					let roundTpl = `<div class="round" id="r${round}"><div class="round-teams">`;
+					
+					roundTpl = `${roundTpl}
+						<div class="round-team" style="color: ${teams[i].color}">${teams[i].country}</div>`;
+					
+					roundTpl = `${roundTpl}</div></div>`;
+					
+					el('bracket').append(roundTpl);
+				};
+				
+				const highlightGroupWinners = (min, i1, i2) => {
+					[i1, i2].forEach(item => qry(`#g${Math.floor(min/4)} tr:nth-child(${item + 2}) td:nth-child(9)`).style('color', 'orange'));
+				};
+				
+				const renderGroupScores = () => {
+					game.teams.forEach(item => {
+						teams[item].groupData.forEach((val, i) => {
+							qry(`#g${Math.floor(item/4)} tr:nth-child(${(item % 4) + 2}) td:nth-child(${i + 2})`).insert(val);
+						});
+					});
+				};
+				
+				const renderToggleScores = () => {
+					if (game.win > -1) {
+						el(`score${game.win ? '2' : ''}`).toggleClass('final');
+					}
+				};
+				
+				const initGroups = () => {
+					let tpl = '';
+					let grp = 0;
+					
+					teams.forEach((item, i) => {
+						item.groupData = [0, 0, 0, 0, 0, 0, 0, 0];
+						item.id = i;
+						item.group = Math.floor(i / 4);
+						
+						if (i % 4 === 0) {
+							tpl = `${tpl }<table class="group-grid" id="g${grp}">
+								<tr>
+									<th>Team</th>
+									<th>Pld</th>
+									<th>W</th>
+									<th>D</th>
+									<th>L</th>
+									<th>GF</th>
+									<th>GA</th>
+									<th>GD</th>
+									<th>Pts</th>
+								</tr>`;
+							grp++;
+						}
+						
+						tpl = `${tpl }<tr>
+							<td style="color: ${item.color}">${item.country}</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+							<td>0</td>
+						</tr>`;
+						
+						if ((i + 1) % 4 === 0) {
+							tpl = `${tpl }</table>`;
+						}
+					});
+					
+					el('groups').append(tpl);
+				};
+				
+				const renderPlayScore = (item, i, val) => {
+					if (item) {
+						el(`country${!i ? '' : i + 1}`).insert(`<span style="color: ${teams[item].color}">${teams[item].country}</span>`);
+					}
+					el(`score${!i ? '' : i + 1}`).insert(val);
+				};
+				
+				const events = () => {
+					const key = {
+						n: 110,
+						r: 114
+					};
+					
+					const go = (isRandom) => {
+						el('groups').insert('');
+						el('bracket').insert('');
+						isDone = false;
+						if (isRandom) {
+							teams = shuffle(teams);
+						}
+						if (game.pk.length) {
+							togglePkBoard();
+						}
+						init();
+					};
+					
+					document.addEventListener('keypress', e => {
+						if (e.keyCode === key.n && isDone) {
+							go();
+						} else if (e.keyCode === key.r && isDone) {
+							go(true);
+						}
+					}, true);
+					
+					document.getElementsByTagName('h1')[0].addEventListener('click', e => {
+						 const id = e.target.id;
+
+						if (id === 'new' && isDone) {
+							go();
+						} else if (id === 'random' && isDone) {
+							go(true);
+						}			
+					}, true);
+				};
+				
+				const init = async ()  => {
+					events();
+					initGroups();
+					await groupStage();
+					createBracket();
+					knockoutStage(0);
+				};
+
+				return {
+					init
+				};				
+			})(data).init();
+		</script>
+	</body>
+</html>

@@ -244,7 +244,8 @@ var DATA = {
 			cat: 'Sims',
 			items: [
 				{name: 'Monopoly', url: 'mono.html', desc: 'Fully customizable simulation done in pure SVG in a MVC framework'},
-				{name: 'Baseball', url: 'baseball.html', desc: 'Customizable baseball teams simulation'}
+				{name: 'Baseball', url: 'baseball.html', desc: 'Customizable baseball teams simulation'},
+				{name: 'World Cup', url: 'world-cup.html', desc: 'Customizable World Cup simulation'}
 			]
 		}
 	]
