@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>US Election</title>
+		<style>
+			body {
+				background-color: #000;
+				font-family: verdana, arial, sans-serif;
+				font-size: 12px;
+				color: #fff;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				margin: 0;
+				height: 100vh;
+			}
+			
+			#vmap {
+				flex: 4;
+			}
+			
+			#legend {
+				flex: 1;
+			}
+			
+			.legend-line-title {
+				margin-bottom: 3px;
+				font-size: .9rem;
+			}
+			
+			.legend-line {
+				margin-bottom: 3px;
+				font-size: 1.08rem;
+			}
+			
+			.cand {
+				display: inline-block;
+				width: 80px;
+			}
+			
+			.cand.re {
+				color: red;
+			}
+			
+			.cand.de {
+				color: blue;
+			}
+		</style>
+		<script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery.vmap.js"></script>
+    <script src="jquery.vmap.usa.js"></script>
+	</head>
+	<body>
+    <div id="vmap" style="height: 600px;"></div>
+		<div id="legend">
+				<div class="legend-line-title">270 to Win</div>
+				<div class="legend-line"><span class="cand re">Trump</span><span id="rv">0</span></div>
+				<div class="legend-line"><span class="cand de">Biden</span><span id="dv">0</span></div>
+		</div>
+	  <script>
+			const data = {
+				al: { ev: 9, ind: 1 },
+				ak: { ev: 3, ind: 2 },
+				ar: { ev: 6, ind: 1 },
+				az: { ev: 11, ind: 5 },
+				ca: { ev: 55, ind: 9 },
+				co: { ev: 9, ind: 8 },
+				ct: { ev: 4, ind: 8 },
+				dc: { ev: 3, ind: 9 },
+				de: { ev: 3, ind: 9 },
+				fl: { ev: 29, ind: 5 },
+				ga: { ev: 16, ind: 4 },
+				hi: { ev: 4, ind: 9 },
+				ia: { ev: 6, ind: 3 },
+				id: { ev: 4, ind: 1 },
+				il: { ev: 20, ind: 7 },
+				'in':  { ev: 11, ind: 3 },
+				ks: { ev: 6, ind: 3 },
+				ky: { ev: 8, ind: 1 },
+				la: { ev: 8, ind: 2 },
+				ma: { ev: 11, ind: 9 },
+				me: { ev: 4, ind: 7 },
+				md: { ev: 10, ind: 9 },
+				mi: { ev: 16, ind: 6 },
+				mn: { ev: 10, ind: 7 },
+				mo: { ev: 10, ind: 3 },
+				ms: { ev: 6, ind: 1 },
+				mt: { ev: 3, ind: 3 },
+				nc: { ev: 15, ind: 6 },
+				nd: { ev: 3, ind: 1 },
+				ne: { ev: 5, ind: 2 },
+				nh: { ev: 4, ind: 7 },
+				nj: { ev: 14, ind: 8 },
+				nm: { ev: 5, ind: 8 },
+				nv: { ev: 6, ind: 7 },
+				ny: { ev: 29, ind: 9 },
+				oh: { ev: 18, ind: 4 },
+				ok: { ev: 7, ind: 1 },
+				or: { ev: 7, ind: 8 },
+				pa: { ev: 20, ind: 6 },
+				ri: { ev: 4, ind: 9 },
+				sc: { ev: 9, ind: 2 },
+				sd: { ev: 3, ind: 1 },
+				tn: { ev: 11, ind: 1 },
+				tx: { ev: 38, ind: 4 },
+				ut: { ev: 6, ind: 3 },
+				va: { ev: 13, ind: 6 },
+				vt: { ev: 3, ind: 7 },
+				wa: { ev: 12, ind: 9 },
+				wi: { ev: 10, ind: 6 },
+				wv: { ev: 5, ind: 3 },
+				wy: { ev: 3, ind: 1 }
+			};
+			
+			(function(mapData) {
+				let rv = 0;
+				let dv = 0;
+				
+				function initMap() {
+					$('#vmap').vectorMap({
+						map: 'usa_en',
+						backgroundColor: '#000',
+						color: '#666',
+						enableZoom: true,
+						showTooltip: false,
+						borderColor: '#000',
+						hoverColor: null,
+						borderWidth: 1,
+						colors: {
+							//ny: 'blue',
+							//dc: 'blue'
+						},
+						onRegionClick: function(event, code, region){
+							event.preventDefault();
+							console.log(code);
+						}
+					});
+				}
+
+				function setRed(code, score) {
+					$('#vmap').vectorMap('set', 'colors', { [code]: 'red'});
+					$('#rv').html(score);
+				}
+				
+				function setBlue(code, score) {
+					$('#vmap').vectorMap('set', 'colors', { [code]: 'blue'});
+					$('#dv').html(score);
+				}
+				
+				function rand(min, max) {
+					return Math.floor(Math.random() * (max - min +1)) + min;
+				}
+				
+				function vote(code, obj) {
+					const b = obj.ind > 6;
+					const r = obj.ind < 4;
+					const s = obj.ind === 5;
+					const sr = obj.ind === 4;
+					const sb = obj.ind === 6;
+					
+					switch(true) {
+						case b: {
+							dv = dv + obj.ev;
+							setBlue(code, dv);
+							break;
+						}
+						case r: {
+							rv = rv + obj.ev
+							setRed(code, rv);
+							break;
+						}
+						case sr: {
+							const isRed = rand(0, 2);
+							
+							if (isRed) {
+								rv = rv + obj.ev
+								setRed(code, rv);
+							} else {
+								dv = dv + obj.ev
+								setBlue(code, dv);
+							}
+							break;
+						}
+						case sb: {
+							const isBlue = rand(0, 2);
+							
+							if (isBlue) {
+								dv = dv + obj.ev
+								setBlue(code, dv);
+							} else {
+								rv = rv + obj.ev
+								setRed(code, rv);
+							}
+							break;
+						}
+						default:
+							const isBlue = rand(0, 1);
+							
+							if (isBlue) {
+								dv = dv + obj.ev
+								setBlue(code, dv);
+							} else {
+								rv = rv + obj.ev
+								setRed(code, rv);
+							}
+					}
+				}
+				
+				function loop() {
+					const keys = Object.keys(mapData);
+					let count = 0;
+					const elect = setInterval(() => {
+						if (count < keys.length) {
+							vote(keys[count], mapData[keys[count]]);
+							count++;
+						} else {
+							clearInterval(elect);
+						}
+					}, 1000);
+				}
+
+				function init() {
+					initMap();
+					loop();
+				}
+				
+				return {
+					init
+				};
+			})(data).init();
+    </script>
+  </body>
+</html>
