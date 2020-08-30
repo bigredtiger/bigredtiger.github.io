@@ -18,38 +18,46 @@
 				flex-flow: row wrap;
 				height: 100vh;
 			}
+			
 			header {
 				overflow: hidden;
 				flex: 0 0 100%;
 				height: 98px;
 			}
+			
 			h1, h2 {
 				color: #000;
 				user-select: none;
 			}
+			
 			#container {
 				flex: 0 0 88%;
 				display: flex;
 				flex-flow: row nowrap;
 				height: calc(100% - 125px);
 			}
+			
 			#mainNav {
 				flex: 0 0 12%;
 			}
+			
 			#menu, #controls {
 				margin: 0;
 				padding: 0;
 				list-style: none;
 			}
+			
 			.menuItem {
 				text-align: right;
 				padding: 8px 0 12px 0;
 				margin-bottom: 8px;
 				cursor: pointer;
 			}
+			
 			.menuItem:first-child {
 				padding-top: 0;
 			}
+			
 			footer {
 				flex: 0 0 100%;
 				align-self: flex-end;
@@ -65,19 +73,23 @@
 				max-width: 464px;
 				align-self: flex-start;
 			}
+			
 			#splashImg {
 				background: no-repeat;
 				width: 464px;
 				height: 312px;
 				margin-bottom: 3px;
 			}
+			
 			#splashDesc {
 				margin-left: 10px;
 			}
+			
 			#email {
 				float: right;
 				color: purple;
 			}
+			
 			#quote {
 				flex: 0 1 50%;
 				max-width: 33%;
@@ -85,16 +97,19 @@
 				margin: 0 0 0 28px;
 				align-self: flex-start;
 			}
+			
 			#quoteText {
 				margin: 0;
 				font-size: 2em;
 				text-align: justify;
 				line-height: 34px;
 			}
+			
 			#quoteText:first-letter {
 				font-size: 2.2em;
 				color: violet;
-			}			
+			}
+			
 			#author {
 			    font-size: 1.8em;
 				color: purple;
@@ -112,17 +127,22 @@
 				align-content: flex-start;
 				height: calc(100% + 88px)
 			}
+			
 			#counter {
 				margin: 0 0 1px 0;
 				user-select: none;
 				flex: 0 0 100%;
 			}
+			
 			#myImg {
 				flex: 0;
 				margin-right: 20px;
 				max-height: 88%;
+				max-width: 88%;
+				object-fit: contain;
 				user-select: none;
 			}
+			
 			#desc {
 				margin-top: 0;
 				flex: 1;
@@ -138,23 +158,29 @@
 				font-size: 1.1rem;
 				user-select: none;
 			}
+			
 			.controlButton {
 				text-align: right;
 				padding: 10px;
 				cursor: pointer;
 			}
+			
 			.controlButton:active {
 				color: violet;
 			}
+			
 			#prev:after {
 				content: "\25c1";
-			}			
+			}
+			
 			#next:after {
 				content: "\25b7";
 			}
+			
 			.play:after {
 				content: "\25b6";
 			}
+			
 			.pause:after {
 				color: violet;
 				content: "\23f8";
@@ -167,6 +193,7 @@
 				flex: 0 0 130px;
 				height: 162px;
 			}
+			
 			#resume, #resume:visited {
 				margin-left: 28px;
 				color: cyan;
@@ -180,11 +207,13 @@
 				flex-flow: row wrap;
 				align-self: flex-start;
 			}
+			
 			.cat {
 				flex: 0 0 100%;
 				text-transform: lowercase;
 				margin-bottom: 10px;
 			}
+			
 			.game, .game:visited {
 				flex: 0 0 60px;
 				background-color: violet;
@@ -212,6 +241,7 @@
 					document.getElementById(sel).innerHTML = tpl;
 				}			
 			}
+			
 			class Main extends Renderer {
 				constructor(config = {
 					home: Home,
@@ -239,6 +269,7 @@
 					this.init();
 					this.events();					
 				}
+				
 				preLoad(imgPath, srcAry, imgAry) {
 					if (Array.isArray(srcAry)) {
 						for (let i = 0, max = srcAry.length; i < max; i++) {
@@ -249,10 +280,12 @@
 						this[imgAry] = new Image;
 						this[imgAry].src = imgPath + srcAry;
 					}
-				}				
+				}
+				
 				setFooterYear() {
 					this.render('currentYear', (new Date).getFullYear());
 				}
+				
 				showPage(txt) {
 					let config;
 
@@ -306,6 +339,7 @@
 					document.getElementById(id).style.color = this.highlightColor;
 					this.prevMenuId = id;
 				}
+				
 				events() {
 					document.getElementById('mainNav').addEventListener('click', e => {
 						const txt = e.target.innerText;
@@ -321,6 +355,7 @@
 						this.showPage(txt);
 					}, true);
 				}
+				
 				renderNav() {
 					let tpl = '<ul id="menu">';
 					const menu = DATA.menu;
@@ -340,6 +375,7 @@
 					}
 				}
 			}
+			
 			class Home extends Renderer {
 				constructor(container, config) {
 					super();
@@ -352,9 +388,11 @@
 					this.render(container, this.getTpl());
 					document.getElementById('splashImg').style.backgroundImage = `url(${this.imgs[this.splashIdx].src})`;
 				}
+				
 				rand(max) {
 					return Math.floor(Math.random() * max);
-				}				
+				}
+				
 				getTpl() {
 					return `
 						<section id="splash">
@@ -369,6 +407,7 @@
 					`;
 				}
 			}
+			
 			class Photos extends Renderer {
 				constructor(container, config) {
 					super();
@@ -382,18 +421,22 @@
 					this.show(this.count);
 					this.render(config.navContainer, this.getNavTpl());
 				}
+				
 				next() {
 					this.count = this.count < this.max ? this.count + 1 : 0;
 					this.show(this.count);
-				}				
+				}
+				
 				prev() {
 					this.count = this.count > 0 ? this.count - 1 : this.max;
 					this.show(this.count);
-				}				
+				}
+				
 				show(i) {
 					this.render(this.container, this.getTpl(i));
 					document.getElementById('myImg').src = this.imgAry[i].src;
 				}
+				
 				togglePlay() {
 					if (!this.playBool) {
 						this.playBool = setInterval(() => {
@@ -410,6 +453,7 @@
 						this.playBool = false;
 					}
 				}
+				
 				toggleTpl() {
 					if (this.playBool) {
 						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' pause';
@@ -417,6 +461,7 @@
 						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' play';
 					}
 				}
+				
 				getTpl(i) {
 					return `
 						<section id="photos">
@@ -426,6 +471,7 @@
 						</section>
 					`;
 				}
+				
 				getNavTpl() {
 					return `
 						<ul id="controls">
@@ -435,6 +481,7 @@
 						</ul>
 					`;				
 				}
+				
 				eventHandler(e) {
 					const id = e.target.id;
 
@@ -447,19 +494,22 @@
 						this.toggleTpl();
 					}
 				}
+				
 				destroy() {
 					if (this.playBool) {
 						document.getElementById('toggle').click();
 					}
 				}
-			}			
+			}
+			
 			class Resume extends Renderer {
 				constructor(container, config) {
 					super();
 					this.profilePic = config.profilePic;
 					this.render(container, this.getTpl());
 					document.getElementById('profileImg').style.backgroundImage = `url(${this.profilePic.src})`;
-				}			
+				}
+				
 				getTpl() {
 					return `
 						<div id="profileImg"></div>
@@ -467,11 +517,13 @@
 					`;
 				}
 			}
+			
 			class Games extends Renderer {
 				constructor(container) {
 					super();
 					this.render(container, this.getTpl());
-				}				
+				}
+				
 				getTpl() {
 					let tpl = '<section id="games">';
 					const games = DATA.games;
@@ -488,7 +540,8 @@
 					
 					return `${tpl}</section>`;
 				}
-			}			
+			}
+			
 			new Main();
 		</script>
 	</body>
