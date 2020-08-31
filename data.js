@@ -235,11 +235,11 @@ var DATA = {
 		{photo: 'tulsi.jpg', desc: 'Getting political, Summer 2019.'},
 		{photo: 'barry.jpg', desc: 'My life philosophy is based on Barry\'s views, Summer 2019.'},
 		{photo: 'panusopen.jpg', desc: 'Enjoying the game, Fall 2019.'},
-		{photo: 'nyc.jpg', desc: 'Great view from Weehawken, Fall 2019.'},
-		{photo: 'commute.jpg', desc: 'Best job ever.  I\'ll miss the commute, Fall 2019.'},
-		{photo: 'nola.jpg', desc: 'New Orleans right before Pandemic, Jan 2020.'},
-		{photo: 'kc.jpg', desc: 'Kansas City Midnight, Jan 2020.'},
-		{photo: 'hustle.jpg', desc: 'Preach it, Jan 2020.'},		
+		{photo: 'nyc.jpg', desc: 'Great view from Weehawken, NJ, Fall 2019.'},
+		{photo: 'commute.jpg', desc: 'Best job ever.  I\'ll miss the commute, Weehawken, Fall 2019.'},
+		{photo: 'nola.jpg', desc: 'New Orleans right before Pandemic, La, Jan 2020.'},
+		{photo: 'kc.jpg', desc: 'Kansas City Midnight, Mo, Jan 2020.'},
+		{photo: 'hustle.jpg', desc: 'Preach it, KC, Jan 2020.'},		
 		{photo: 'limo.jpg', desc: 'Here\'s to you and the good life.'}
 	],
 	games: [
