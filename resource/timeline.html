@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Timeline</title>
+		<meta charset="utf-8" />
+		<style>
+			#main {
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                color: white;
+                display: flex;
+                margin: 0;
+                background-color: blue;
+            }
+            .timeline {
+                background-color: darkblue;
+                position: fixed;
+                height: 100vh;
+                flex: 1;
+                width: 130px;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+            .content {
+                background-color: blue;
+                height: 3000px;
+                flex: 1;
+                margin-left: 130px;
+            }
+            h1 {
+                font-size: 1.3rem;
+                text-align: center;
+            }
+            #years {
+                margin: 30px 0 0;
+                padding: 0;
+                list-style: none;
+                text-align: center;
+            }
+            .year {
+                margin-bottom: 10px;
+                color: lightblue;
+                cursor: pointer;
+            }
+            .big-year {
+                right: 60px;
+                position: absolute;
+                opacity: .3;
+                font-size: 10rem;
+                padding-top: 30px;
+            }
+            .year:after {
+                font-size: 1rem;
+                margin-left: 8px;
+                content: " ";
+            }
+            .year.selected::after {
+                font-size: 1rem;
+                content: "\2022";
+                color: white;
+                position: relative;
+                top: 2px;
+                margin-left: 3px;
+            }
+            .content {
+                padding: 0 60px;
+            }
+            #tl-content {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            .tl-content-item {
+                font-size: 1.7rem;
+                padding-top: 200px;
+                padding-bottom: 600px;
+            }
+		</style>  
+
+	</head>
+	<body id="main">
+		<section class="timeline">
+            <h1>AbbVie</h1>
+            <ul id="years"></ul>
+        </section>
+        <section class="content">
+            <ul id="tl-content"></ul>
+        </section>
+
+		
+
+		<script type="module">
+            const data = [
+                { year: 2013, content: '1 Lorem ipsum dolor sit amet, vel ullum senserit voluptatibus te. Per te iudico oratio prodesset, sale inermis invidunt at sed. Ne vim vide vivendum persequeris, pro an periculis patrioque dissentiunt. Ei dolor ullamcorper sea.' },
+                { year: 2014, content: '2 Lorem ipsum dolor sit amet, vel ullum senserit voluptatibus te. Per te iudico oratio prodesset, sale inermis invidunt at sed. Ne vim vide vivendum persequeris, pro an periculis patrioque dissentiunt. Ei dolor ullamcorper sea.' },
+                { year: 2015, content: '3 Lorem ipsum dolor sit amet, vel ullum senserit voluptatibus te. Per te iudico oratio prodesset, sale inermis invidunt at sed. Ne vim vide vivendum persequeris, pro an periculis patrioque dissentiunt. Ei dolor ullamcorper sea.' },
+                { year: 2016, content: '4 Lorem ipsum dolor sit amet, vel ullum senserit voluptatibus te. Per te iudico oratio prodesset, sale inermis invidunt at sed. Ne vim vide vivendum persequeris, pro an periculis patrioque dissentiunt. Ei dolor ullamcorper sea.' },
+                { year: 2017, content: '5 Lorem ipsum dolor sit amet, vel ullum senserit voluptatibus te. Per te iudico oratio prodesset, sale inermis invidunt at sed. Ne vim vide vivendum persequeris, pro an periculis patrioque dissentiunt. Ei dolor ullamcorper sea.' }
+            ];
+
+			(function(data) {
+                
+				function initData() {
+                    let years = '';
+                    let content = '';
+                    const hash = location.hash.split('_')[1];
+                    const hashYear = parseInt(hash, 10);
+                    const hasHash = !isNaN(hashYear);
+
+                    for (let i = 0; i < data.length; i++) {
+                        const item = data[i];
+
+                        if (hasHash && hashYear === item.year || !hasHash && i === 0) {
+                            years = `${years}<li id="a_c_${item.year}" class="year selected">${item.year}</li>`;
+                        } else {
+                            years = `${years}<li id="a_c_${item.year}" class="year">${item.year}</li>`;
+                        }
+                        content = `${content}<li id="c_${item.year}" class="tl-content-item">
+                            ${item.content}
+                            <div class="big-year">${item.year}</div>
+                            </li>`;
+                    }
+
+                    document.getElementById('years').innerHTML = years;
+                    document.getElementById('tl-content').innerHTML = content;
+                }
+
+				function events() {
+                    let prevScrollTop = 0;
+                    let locked = false;
+                    document.getElementById('years').addEventListener('click', (e) => {
+                        if (e.target.className === 'year') {
+                            const newYear = parseInt(e.target.id.split('_')[2], 10);
+                            const oldScrollTop = prevScrollTop;
+                            const oldYear = parseInt(location.hash.split('_')[1], 10);
+                            let keepScroll;
+                            let func;
+                            let timer;
+                            locked = true;
+
+                            if (isNaN(oldYear)) {
+                                document.getElementById(`a_c_${newYear - 1}`).className = 'year';
+                                e.target.className = 'year selected';
+                            } else {
+                                document.getElementById(`a_c_${oldYear}`).className = 'year';
+                                e.target.className = 'year selected';
+                            }
+                                    
+                            if (!isNaN(oldYear) && oldYear > newYear) {
+                                func = () => {
+                                    if (prevScrollTop > oldScrollTop - 700) {  
+                                        prevScrollTop-=100;
+                                        window.scrollTo(0, prevScrollTop);
+                                    } else {
+                                        clearInterval(timer);
+                                        location.hash = `#c_${newYear}`;
+                                        prevScrollTop = window.pageYOffset;
+                                        setTimeout(() => locked = false);
+                                    }
+                                }
+                            } else {
+                                func = () => {
+                                    if (prevScrollTop < oldScrollTop + 700) {
+                                        prevScrollTop+=100;
+                                        window.scrollTo(0, prevScrollTop);
+                                    } else {
+                                        clearInterval(timer);
+                                        location.hash = `#c_${newYear}`;
+                                        prevScrollTop = window.pageYOffset;
+                                        setTimeout(() => locked = false);
+                                    }
+                                }
+                            }
+
+                            timer = setInterval(func, 100);
+                        }
+                    }, true);
+
+                    window.addEventListener('scroll', () => {
+                        if (!locked) {
+                            const index = Math.floor(window.pageYOffset / 928);
+
+                            for (let item of data) {
+                                document.getElementById(`a_c_${item.year}`).className = 'year';
+                            }
+
+                            document.getElementById(`a_c_${data[index].year}`).className = 'year selected';
+                        }
+                    }, true);
+				}
+			
+				function init() {
+					events();
+                    initData();
+				}
+				
+				return {
+					init
+				};
+			})(data).init();
+		</script>
+	</body>
+</html>
