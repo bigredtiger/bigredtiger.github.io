@@ -114,7 +114,8 @@ var DATA = {
 		{quote: 'We\'re having too good a time today. We ain\'t thinking about tomorrow', auth: 'John Dillinger'},
 		{quote: 'Are you not entertained?', auth: 'Maximus Decimus Meridius'},
 		{quote: 'People would rather believe than know', auth: 'Edward O Wilson'},
-		{quote: 'How can you prove whether at this moment we are sleeping, and all our thoughts are a dream; or whether we are awake, and talking to one another in the waking state?', auth: 'Plato'},		
+		{quote: 'How can you prove whether at this moment we are sleeping, and all our thoughts are a dream; or whether we are awake, and talking to one another in the waking state?', auth: 'Plato'},
+		{quote: 'I do not standby in the presence of evil!', auth: 'Alita'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
@@ -239,7 +240,7 @@ var DATA = {
 		{photo: 'commute.jpg', desc: 'Best job ever.  I\'ll miss the commute, Weehawken, Fall 2019.'},
 		{photo: 'nola.jpg', desc: 'New Orleans right before Pandemic, La, Jan 2020.'},
 		{photo: 'kc.jpg', desc: 'Kansas City Midnight, Mo, Jan 2020.'},
-		{photo: 'hustle.jpg', desc: 'Preach it, KC, Jan 2020.'},		
+		{photo: 'hustle.jpg', desc: 'Preach it, KC, Jan 2020.'},
 		{photo: 'limo.jpg', desc: 'Here\'s to you and the good life.'}
 	],
 	games: [
