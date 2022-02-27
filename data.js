@@ -262,7 +262,8 @@ var DATA = {
 				{name: 'Monopoly', url: 'mono.html', desc: 'Fully customizable simulation done in pure SVG in a MVC framework'},
 				{name: 'Baseball', url: 'baseball.html', desc: 'Customizable baseball teams simulation'},
 				{name: 'World Cup', url: 'world-cup.html', desc: 'Customizable World Cup simulation'},
-				{name: 'Election', url: 'election.html', desc: 'Simulation of 2020 Presidential Election'}
+				{name: 'Election', url: 'election.html', desc: 'Simulation of 2020 Presidential Election'},
+				{name: 'X-Country', url: 'x-country.html', desc: 'Simulation of Olympic women\'s 30k x-country skiing'}
 			]
 		}
 	]

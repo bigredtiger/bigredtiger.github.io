@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>X-Country</title>
+		<style>
+			:root {
+        --bg-color: black;
+        --path-color: white;
+      }
+
+			body {
+				background-color: var(--bg-color);
+				color: #ddd;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 93vh;
+				margin: 0;
+			}
+
+			#container {
+				display: flex;
+				flex: 0;
+				flex-flow: row wrap;
+				border-radius: 6px;
+			}
+			
+			/* board */
+			
+			.row {
+				flex: 0 0 100%;
+				display: flex;
+			}
+
+			.tree, .medal, .level, .magic-tree {
+				width: 20px;
+				height: 20px;
+				background-color: transparent;
+				color: lightgreen;
+				box-sizing: border-box;
+				position: relative;
+				top: -2px;
+				left: 5px;
+			}
+	
+			.tree:before, .medal:before, .level:before, .magic-tree:before {
+				content: "\2022";
+				font-size: 20px;
+			}
+
+			.level {
+				cursor: pointer;
+			}
+
+			.magic-tree {
+				color: red;
+				cursor: pointer;
+			}
+
+			.path {
+				width: 20px;
+				height: 20px;
+				background-color: var(--path-color);
+				border-top: 1px solid var(--path-color);
+				border-bottom: 1px solid var(--path-color);
+			}
+	
+			.fin {
+				width: 20px;
+				height: 20px;
+				background-color: var(--path-color);
+				border-top: 2px solid red;
+				border-bottom: 0;
+			}
+		
+			.up {
+				width: 20px;
+				height: 20px;
+				background-color: #ccc;
+				border-top: 1px solid #ccc;
+				border-bottom: 1px solid #ccc;
+			}
+		
+			.down {
+				width: 20px;
+				height: 20px;
+				background-color: cyan;
+				border-top: 1px solid cyan;
+				border-bottom: 1px solid cyan;
+			}
+		
+			.blank {
+				width: 20px;
+				height: 20px;
+			}
+		
+			#USA {
+				color: blue;
+				position: absolute;
+				font-size: 11px;
+				padding-top: 7px;
+			}
+		
+			#NOR {
+				color: red;
+				position: absolute;
+				font-size: 11px;
+				padding-top: 7px;
+			}
+		
+			#FIN {
+				color: #333;
+				position: absolute;
+				font-size: 11px;
+				padding-top: 7px;
+			}
+		</style>
+	</head>
+	<body>
+		<section id="container"></section>
+		<script type="module">
+			import { el, rand, sleep, qry, qryAll, log, sortDesc, renderColorText } from '../lib/lib.js';
+
+			(function() {
+				const board = [
+					[9,10,10,10,3,3,3,3,3,3,3],
+					[1,1,2,0,3,0,0,0,0,0,3],
+					[1,0,2,0,1,7,7,7,7,0,1],
+					[1,0,2,0,1,0,7,7,7,0,1],
+					[6,0,2,2,1,0,7,7,7,0,1],
+					[1,0,0,0,0,0,7,7,7,0,1],
+					[1,0,7,7,7,0,0,7,0,0,1],
+					[1,0,7,7,7,0,1,1,2,0,1],
+					[3,0,0,0,0,0,1,0,2,0,1],						
+					[3,3,3,3,3,3,1,0,2,0,1],
+					[8,8,8,0,0,0,0,7,2,2,1]						
+				];			
+				const map = [
+					'tree',
+					'path',
+					'up',
+					'down',
+					'',
+					'',
+					'fin',
+					'blank',
+					'medal',
+					'magic-tree',
+					'level'
+				];
+				let curY;
+				let curX;
+				let indY;
+				let indX;
+				let dir = 'u';
+				let isFlag = false;
+				let playerIndex = 0;
+				let players = {
+					USA: {
+						name: 'Jessie Diggins',
+						dirIndex: 0,
+						list: false,
+						dirList: [],
+						dir: 'u'
+					},
+					NOR: {
+						name: 'Therese Johaug',
+						dirIndex: 0,
+						list: false,
+						dirList: [],
+						dir: 'u'
+					},
+					FIN: {
+						name: 'Kerttu Niskanen',
+						dirIndex: 0,
+						list: false,
+						dirList: [],
+						dir: 'u'
+					}
+				};
+				const medals = ['Bronze', 'Silver', 'Gold'];
+				let laps = 0;
+				let maxLaps = 1;
+
+				function renderBoard() {
+					const max = board.length;
+					let tpl = '';
+					
+					for (let i = 0; i < max; i++) {
+						for (let j = 0; j < board[i].length; j++) {
+							if (j === 0) {
+								tpl = `${tpl}<div class="row">`;
+							}
+
+							tpl = `${tpl}<div class="${map[board[i][j]]}"></div>`;
+							
+							if (j === board[i].length - 1) {
+								tpl = `${tpl}</div>`;
+							}
+						}
+					}
+					
+					el('container').insert(tpl);
+				}
+
+				function checkBarrier(id) {
+					let nextX;
+					let nextY;
+
+					dir = players[id].dir;
+
+					switch (dir) {
+						case 'u':
+							nextY = curY - 11;
+							indX = Math.floor(curX / 20);
+							indY = Math.floor(nextY / 20);
+							break;
+						case 'r':
+							nextX = curX + 10;
+							indX = Math.floor(nextX / 20);
+							indY = Math.floor(curY / 20);
+							break;
+						case 'd':
+							nextY = curY + 11;
+							indX = Math.floor(curX / 20);
+							indY = Math.floor(nextY / 20);
+							break;
+						case 'l':
+							nextX = curX - 10;
+							indX = Math.floor(nextX / 20);
+							indY = Math.floor(curY / 20);
+							break;
+					}
+					// log(id, indY, indX, dir)
+					if (indY >= 0 && indY < board.length && indX >= 0 && indX < board[0].length && 
+						board[indY][indX] > 0 && board[indY][indX] < 7) {
+						switch (dir) {
+							case 'u':
+							case 'd':
+								curY = nextY;
+								break;
+							case 'r':
+							case 'l':
+								curX = nextX;
+								break;
+						}
+
+						players[id].dirList = [];
+					} else {
+						if (indX === 10 && !players[id].list) {
+							isFlag = true;
+							players[id].list = true;
+						} else if (indX === 0 && players[id].list) {
+							if (isFlag) {
+								laps++;
+							}
+							isFlag = false;
+							players[id].list = false;
+						}
+
+						if (players[id].dirList.length) {
+							players[id].dir = players[id].dirList.pop();
+						} else {
+							switch (players[id].dir) {
+								case 'u':
+								case 'd':
+									if (players[id].list) {
+										players[id].dir = 'l';
+										players[id].dirList.push('r');
+									} else {
+										players[id].dir = 'r';
+										players[id].dirList.push('l');
+									}
+									break;
+								case 'r':
+								case 'l':
+									players[id].dir = 'u';
+									players[id].dirList.push('d');
+									break;
+							}
+						}
+						
+						checkBarrier(id);
+					} 
+				}
+
+				async function move(id, spaces) {
+					for (let i = 0; i < spaces; i++) {
+						checkBarrier(id);
+						await go(id);
+						winMedal(id);
+					}
+
+					return Promise.resolve();
+				}
+
+				async function go(id) {
+					switch (dir) {
+						case 'u':
+						case 'd':
+							await animateY(id, curY, getDuration());
+							break;
+						case 'r':
+						case 'l':
+							await animateX(id, curX, getDuration());
+							break;
+					}
+
+					return Promise.resolve();
+				}
+
+				async function animateY(id, nextY, dur) {			
+					await sleep(dur);
+					el(id).style('marginTop', `${nextY}px`);
+
+					return Promise.resolve();
+				}
+
+				async function animateX(id, nextX, dur) {			
+					await sleep(dur);
+					el(id).style('marginLeft', `${nextX}px`);
+
+					return Promise.resolve();
+				}
+
+				function getDuration() {
+					const val = board[indY][indX];
+
+					switch (val) {
+						case 1:
+							return .3;
+						case 2:
+							return .6;
+						case 3:
+							return .1;
+						default:
+							return .2;
+					}
+				}
+
+				function addMarkers() {
+					const keys = Object.keys(players);
+
+					for (let x of keys) {
+						el('container').append(`<div id="${x}">x</div>`);
+					}
+				}
+				function setUpMarkers() {
+					el('USA').style('marginTop', '78px');
+					el('USA').style('marginLeft', '0');
+		
+					el('NOR').style('marginTop', '78px');
+					el('NOR').style('marginLeft', '10px');
+
+					el('FIN').style('marginTop', '90px');
+					el('FIN').style('marginLeft', '0px');
+				}
+
+				function switchUser(id) {
+					curY = parseInt(document.getElementById(id).style.marginTop, 10);
+					curX = parseInt(document.getElementById(id).style.marginLeft, 10);
+				}
+
+				function isFin() {
+					return !medals.length;
+				}
+
+				function nextPlayer() {
+					const keys = Object.keys(players);
+					const player = keys[playerIndex];
+
+					playerIndex++;
+					if (playerIndex >= keys.length) {
+						playerIndex = 0;
+					}
+
+					return player;
+				}
+
+				function winMedal(id) {
+					if (indX === 0 && indY < 4 && laps >= maxLaps && !players[id].medal) {
+						const index = 3 - medals.length;
+
+						qryAll('.medal', index).setAttr('title', `${players[id].name} (${id})`);
+						players[id].medal = medals.pop();
+						log(`${players[id].medal}:: ${players[id].name} (${id})`);
+					}
+				}
+
+				function medalsStand() {
+					const colors = ['gold', 'silver', 'darkgoldenrod'];
+
+					colors.forEach((color, i) => {
+						qryAll('.medal', i).style('color', color);
+						qryAll('.medal', i).style('cursor', 'pointer');
+					});
+				}
+
+				function highlightLevel() {
+					if (laps < maxLaps) {
+						for (let i = 0; i < maxLaps; i++) {
+							if (laps === i) {
+								qryAll('.level', i).style('color', 'blue');
+							} else {
+								qryAll('.level', i).style('color', 'darkgreen');
+							}
+						}
+					}
+				}
+
+				async function loop() {
+					while (!isFin()) {
+						let spaces = rand(0, 10);
+						const id = nextPlayer();
+
+						highlightLevel();
+						switchUser(id);
+						await move(id, spaces);
+					}
+
+					medalsStand();
+				}
+
+				function events() {
+					qry('.magic-tree').listener('click', e => {
+						if (isFin()) {
+							players = {
+								USA: {
+									name: 'Jessie Diggins',
+									dirIndex: 0,
+									list: false,
+									dirList: [],
+									dir: 'u'
+								},
+								NOR: {
+									name: 'Therese Johaug',
+									dirIndex: 0,
+									list: false,
+									dirList: [],
+									dir: 'u'
+								},
+								FIN: {
+									name: 'Kerttu Niskanen',
+									dirIndex: 0,
+									list: false,
+									dirList: [],
+									dir: 'u'
+								}
+							};
+							isFlag = false;
+							laps = 0;
+							medals.push('bronze');
+							medals.push('silver');
+							medals.push('gold');
+							setUpMarkers();
+							for (let i = 0; i < 3; i++) {
+								qryAll('.medal', i).style('color', 'lightgreen');
+								qryAll('.medal', i).style('cursor', 'default');
+								qryAll('.medal', i).removeAttr('title');
+							}	
+							loop();
+							console.clear();
+							log('Started.');
+						}
+					});
+
+					for (let i = 0; i < 3; i++) {
+						qryAll('.level', i).listener('click', e => {
+							if (isFin()) {
+								maxLaps = i + 1;
+								for (let j = 0; j < 3; j++) {
+									if (j <= i) {
+										qryAll('.level', j).style('color', 'darkgreen');
+									} else {
+										qryAll('.level', j).style('color', 'lightgreen');
+									}
+								}
+							}
+						});
+					}
+				}
+				
+				function init() {
+					log('Started.');
+					renderBoard();
+					events();
+					addMarkers();
+					setUpMarkers();
+					loop();
+				}
+
+				return {
+					init
+				};
+			})().init();
+		</script>
+	</body>
+</html>
