@@ -285,7 +285,7 @@
 				}
 
 				function goPhotos() {
-					renderPhotos();
+					renderPhoto();
 					renderPhotosNav();
 					preLoad('./pics/', data.photos, 'pics');
 					el('myImg').setAttr('src', visuals.pics[picIdx].src);
@@ -293,11 +293,13 @@
 
 				function next() {
 					picIdx = picIdx < data.photos.length ? ++picIdx : 0;
+					renderPhoto();
 					el('myImg').setAttr('src', visuals.pics[picIdx].src);
 				}
 				
 				function prev() {
 					picIdx = picIdx > 0 ? --picIdx : data.photos.length - 1;
+					renderPhoto();
 					el('myImg').setAttr('src', visuals.pics[picIdx].src);
 				}
 				
@@ -356,12 +358,12 @@
 					`);
 				}
 
-				function renderPhotos() {
+				function renderPhoto() {
 					el('container').insert(`
 						<section id="photos">
 							<p id="counter">${picIdx + 1}/${data.photos.length}</p>
 							<img id="myImg" />
-							<p id="desc">${data.photos[0].desc}</p>
+							<p id="desc">${data.photos[picIdx].desc}</p>
 						</section>
 					`);
 				}
