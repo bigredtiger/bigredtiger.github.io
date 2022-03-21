@@ -322,11 +322,7 @@
 				}
 				
 				function toggleTpl() {
-					if (playBool) {
-						el('toggle').toggleClass(document.getElementById('toggle').className.split(' ')[0] + ' pause');
-					} else {
-						el('toggle').toggleClass(document.getElementById('toggle').className.split(' ')[0]);
-					}
+					el('toggle').toggleClass(document.getElementById('toggle').className.split(' ')[0] + ' pause');
 				}
 
 				function renderFooterYear() {
