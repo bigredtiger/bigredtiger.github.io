@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link rel="shortcut icon" href="favicon.ico">
+		<meta charset="utf-8">
+		<meta name="Author" content="Simon Wong">
+		<meta name="keywords" content="Simon Wong :: BigRedTiger.com">
+		<meta name="description" content="Simon Wong :: BigRedTiger.com">			
+		<title>Simon Wong :: BigRedTiger.com</title>
+		<style>
+			body {
+				background-color: #000;
+				color: lavender;
+				font-family: verdana, sans-serif;
+				font-size: 12px;
+				margin: 0 10px;
+				display: flex;
+				flex-flow: row wrap;
+				height: 100vh;
+			}
+			
+			header {
+				overflow: hidden;
+				flex: 0 0 100%;
+				height: 98px;
+			}
+			
+			h1, h2 {
+				color: #000;
+				user-select: none;
+			}
+			
+			#container {
+				flex: 0 0 100%;
+				display: flex;
+				flex-flow: row nowrap;
+				height: calc(100% - 125px);
+			}
+			
+			#mainNav {
+				position: absolute;
+				right: 0;
+				margin-top: 103px;
+			}
+			
+			#menu, #controls {
+				margin: 0;
+				padding: 0;
+				list-style: none;
+			}
+			
+			.menuItem {
+				text-align: right;
+				margin: 0 -6px 39px;
+				cursor: pointer;
+				transform: rotate(90deg);
+			}
+			
+			.menuItem:first-child {
+				padding-top: 0;
+			}
+			
+			footer {
+				flex: 0 0 100%;
+				align-self: flex-end;
+				padding-bottom: 6px;
+				color: purple;
+			}
+			
+			/* home */
+			
+			#splash {
+				flex: 0 1 50%;
+				margin-left: -10px;
+				max-width: 464px;
+				align-self: flex-start;
+			}
+			
+			#splashImg {
+				background: no-repeat;
+				width: 464px;
+				height: 312px;
+				margin-bottom: 3px;
+			}
+			
+			#splashDesc {
+				margin-left: 10px;
+			}
+			
+			#email {
+				float: right;
+				color: purple;
+			}
+			
+			#quote {
+				flex: 0 1 50%;
+				max-width: 33%;
+				font-family: times, serif;
+				margin: 0 0 0 28px;
+				align-self: flex-start;
+			}
+			
+			#quoteText {
+				margin: 0;
+				font-size: 2em;
+				text-align: justify;
+				line-height: 34px;
+			}
+			
+			#quoteText:first-letter {
+				font-size: 2.2em;
+				color: violet;
+			}
+			
+			#author {
+			  font-size: 1.8em;
+				color: purple;
+				font-weight: bold;
+				margin-top: 39px;
+			}
+			
+			/* photos */
+			
+			#photos {
+				margin-top: -88px;
+				flex: 1;
+				display: flex;
+				flex-flow: row wrap;
+				align-content: flex-start;
+				height: calc(100% + 88px);
+			}
+			
+			#counter {
+				margin: 0 0 1px 0;
+				user-select: none;
+				flex: 0 0 100%;
+			}
+			
+			#myImg {
+				flex: 0;
+				margin-right: 20px;
+				max-height: 88%;
+				max-width: 88%;
+				object-fit: contain;
+				object-position: 0 0;
+				user-select: none;
+			}
+			
+			#desc {
+				margin-top: 0;
+				flex: 1;
+				width: 280px;
+			}
+
+			/* photos nav */
+			
+			#photosNav {
+				position: absolute;
+				right: 0;
+				bottom: 10px;
+				font-size: 1.1rem;
+				user-select: none;
+			}
+			
+			.controlButton {
+				text-align: right;
+				padding: 10px;
+				cursor: pointer;
+			}
+			
+			.controlButton:active {
+				color: violet;
+			}
+			
+			#prev:after {
+				content: "\25c1";
+			}
+			
+			#next:after {
+				content: "\25b7";
+			}
+			
+			.play:after {
+				content: "\25b6";
+			}
+			
+			.pause:after {
+				color: violet;
+				content: "\23f8";
+			}			
+			
+			/* resume */
+			
+			#profileImg {
+				background: no-repeat;
+				flex: 0 0 130px;
+				height: 162px;
+			}
+			
+			#resume, #resume:visited {
+				margin-left: 28px;
+				color: cyan;
+				text-decoration: none;
+			}
+			
+			/* games */
+
+			#games {
+				display: flex;
+				flex-flow: row wrap;
+				align-self: flex-start;
+			}
+			
+			.cat {
+				flex: 0 0 100%;
+				text-transform: lowercase;
+				margin-bottom: 10px;
+			}
+			
+			.game, .game:visited {
+				flex: 0 0 60px;
+				background-color: violet;
+				height: 60px;
+				margin: 0 10px 10px 0;
+				padding: 10px;
+				color: #000;
+				text-decoration: none;
+			}			
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>BigRedTiger.com</h1>
+			<h2>Simon Wong :: BigRedTiger.com</h2>
+		</header>
+		<section id="container"></section>
+		<nav id="mainNav"></nav>
+		<nav id="photosNav"></nav>
+		<footer>Copyright &copy; 2000 - <span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
+		<script src="data.js"></script>
+		<script>
+			class Renderer {				
+				render(sel, tpl) {
+					document.getElementById(sel).innerHTML = tpl;
+				}			
+			}
+			
+			class Main extends Renderer {
+				constructor(config = {
+					home: Home,
+					photos: Photos,
+					resume: Resume,
+					games: Games
+				}) {
+					super();
+					this.imgAry = [];
+					this.picAry =[];
+					this.profilePic;
+					this.classes = config;
+					this.currentPage;
+					this.eventContainer;
+					this.homeConfig = {
+						imgs: this.imgAry,
+						splash: DATA.splash,
+						quotes: DATA.quotes
+					};	
+					this.prevMenuId;
+					this.highlightColor = 'violet';
+					
+					this.setFooterYear();
+					this.renderNav();					
+					this.init();
+					this.events();					
+				}
+				
+				preLoad(imgPath, srcAry, imgAry) {
+					if (Array.isArray(srcAry)) {
+						for (let i = 0, max = srcAry.length; i < max; i++) {
+							this[imgAry].push(new Image);
+							this[imgAry][i].src = imgPath + srcAry[i].photo;
+						}
+					} else {
+						this[imgAry] = new Image;
+						this[imgAry].src = imgPath + srcAry;
+					}
+				}
+				
+				setFooterYear() {
+					this.render('currentYear', (new Date).getFullYear());
+				}
+				
+				showPage(txt) {
+					let config;
+
+					if (this.classes[txt]) {
+						switch(txt) {
+							case 'home':
+								if (!this.imgAry.length) {
+									this.preLoad('./images/', DATA.splash, 'imgAry');
+								}					
+
+								config = this.homeConfig;
+								break;
+							case 'photos':
+								if (!this.picAry.length) {
+									this.preLoad('./pics/', DATA.photos, 'picAry');
+								}
+							
+								config = {
+									imgs: this.picAry,
+									photos: DATA.photos,
+									navContainer: 'photosNav'
+								};
+								break;
+							case 'resume':
+								config = { profilePic: this.profilePic };
+						}
+					} else {
+						config = this.homeConfig;
+						txt = 'home';
+					}
+					if (this.currentPage && this.currentPage.eventHandler) {
+						if (this.currentPage.destroy) {
+							this.currentPage.destroy();
+						}
+						this.eventContainer.removeEventListener('click', this.currentPage.eventHandler);
+						this.eventContainer.innerHTML = '';
+					}
+					
+					this.currentPage = new this.classes[txt]('container', config);
+					
+					if (this.currentPage.eventHandler) {
+						this.eventContainer = document.getElementById(config.navContainer);
+						this.eventContainer.addEventListener('click', this.currentPage.eventHandler.bind(this.currentPage), true);
+					}					
+					
+					const id = `${txt}Menu`;
+					
+					if (this.prevMenuId) {
+						document.getElementById(this.prevMenuId).style.color = '';
+					}
+					document.getElementById(id).style.color = this.highlightColor;
+					this.prevMenuId = id;
+				}
+				
+				events() {
+					document.getElementById('mainNav').addEventListener('click', e => {
+						const txt = e.target.innerText;
+
+						if (e.target.tagName === 'LI') {
+							location.href = `#!${txt}`;
+						}
+					}, true);
+					
+					window.addEventListener('hashchange', e => {
+						const txt = location.hash.substring(2);
+						
+						this.showPage(txt);
+					}, true);
+				}
+				
+				renderNav() {
+					let tpl = '<ul id="menu">';
+					const menu = DATA.menu;
+					
+					for (let i = 0; i < menu.length; i++) {
+						tpl = `${tpl}<li class="menuItem" id="${menu[i]}Menu">${menu[i]}</li>`;
+					}
+					
+					this.render('mainNav', `${tpl}</ul>`);
+				}
+				init() {
+					this.preLoad('./images/', 'simonw.jpg', 'profilePic');
+					if (location.hash) {
+						this.showPage(location.hash.substring(2));
+					} else {
+						this.showPage('home');
+					}
+				}
+			}
+			
+			class Home extends Renderer {
+				constructor(container, config) {
+					super();
+					this.imgs = config.imgs;
+					this.splash = config.splash;
+					this.quotes = config.quotes;
+					this.splashIdx = this.rand(this.splash.length);
+					this.quoteIdx = this.rand(this.quotes.length);
+					
+					this.render(container, this.getTpl());
+					document.getElementById('splashImg').style.backgroundImage = `url(${this.imgs[this.splashIdx].src})`;
+				}
+				
+				rand(max) {
+					return Math.floor(Math.random() * max);
+				}
+				
+				getTpl() {
+					return `
+						<section id="splash">
+							<div id="splashImg"></div>
+							<span id="splashDesc">${this.splash[this.splashIdx].desc}</span>
+							<span id="email">simon@bigredtiger.com</span>
+						</section>
+						<section id="quote">
+							<p id="quoteText">${this.quotes[this.quoteIdx].quote}</p>
+							<p id="author">${this.quotes[this.quoteIdx].auth ? this.quotes[this.quoteIdx].auth : '' }</p>
+						</section>
+					`;
+				}
+			}
+			
+			class Photos extends Renderer {
+				constructor(container, config) {
+					super();
+					this.container = container;
+					this.imgAry = config.imgs;
+					this.max = this.imgAry.length - 1;
+					this.photos = config.photos;
+					this.count = 0;
+					this.playBool = false;
+					
+					this.show(this.count);
+					this.render(config.navContainer, this.getNavTpl());
+				}
+				
+				next() {
+					this.count = this.count < this.max ? this.count + 1 : 0;
+					this.show(this.count);
+				}
+				
+				prev() {
+					this.count = this.count > 0 ? this.count - 1 : this.max;
+					this.show(this.count);
+				}
+				
+				show(i) {
+					this.render(this.container, this.getTpl(i));
+					document.getElementById('myImg').src = this.imgAry[i].src;
+				}
+				
+				togglePlay() {
+					if (!this.playBool) {
+						this.playBool = setInterval(() => {
+							this.next();
+							if (this.count >= this.max && this.playBool) {
+								clearInterval(this.playBool);
+								this.playBool = false;
+								this.count = -1;
+								this.toggleTpl();
+							}
+						}, 3000);
+					} else {
+						clearInterval(this.playBool);
+						this.playBool = false;
+					}
+				}
+				
+				toggleTpl() {
+					if (this.playBool) {
+						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' pause';
+					} else {
+						document.getElementById('toggle').className = document.getElementById('toggle').className.split(' ')[0] + ' play';
+					}
+				}
+				
+				getTpl(i) {
+					return `
+						<section id="photos">
+							<p id="counter">${i + 1}/${this.max + 1}</p>
+							<img id="myImg" />
+							<p id="desc">${this.photos[i].desc}</p>
+						</section>
+					`;
+				}
+				
+				getNavTpl() {
+					return `
+						<ul id="controls">
+							<li id="prev" class="controlButton"></li>
+							<li id="next" class="controlButton"></li>
+							<li id="toggle" class="controlButton play"></li>
+						</ul>
+					`;				
+				}
+				
+				eventHandler(e) {
+					const id = e.target.id;
+
+					if (id === 'prev') {						
+						this.prev();
+					} else if (id === 'next') {
+						this.next();
+					} else if (id === 'toggle') {
+						this.togglePlay();
+						this.toggleTpl();
+					}
+				}
+				
+				destroy() {
+					if (this.playBool) {
+						document.getElementById('toggle').click();
+					}
+				}
+			}
+			
+			class Resume extends Renderer {
+				constructor(container, config) {
+					super();
+					this.profilePic = config.profilePic;
+					this.render(container, this.getTpl());
+					document.getElementById('profileImg').style.backgroundImage = `url(${this.profilePic.src})`;
+				}
+				
+				getTpl() {
+					return `
+						<div id="profileImg"></div>
+						<a href="./resource/resume_simon.docx" id="resume">Resume</a>
+					`;
+				}
+			}
+			
+			class Games extends Renderer {
+				constructor(container) {
+					super();
+					this.render(container, this.getTpl());
+				}
+				
+				getTpl() {
+					let tpl = '<section id="games">';
+					const games = DATA.games;
+					
+					for (let i = 0; i < games.length; i++) {
+						tpl = `${tpl}<section class="cat">${games[i].cat}</section>`;
+						
+						const items = games[i].items;
+
+						for (let i = 0; i < items.length; i++) {
+							tpl = `${tpl}<a href="games/${items[i].url}" target="_blank" title="${items[i].desc}" class="game">${items[i].name}</a>`;
+						}
+					}
+					
+					return `${tpl}</section>`;
+				}
+			}
+			
+			new Main();
+		</script>
+	</body>
+</html>
