@@ -235,7 +235,6 @@ var DATA = {
 		{photo: 'torontored.jpg', desc: 'Walking back from a fun night, Toronto, Summer 2019.'},
 		{photo: 'tulsi.jpg', desc: 'Getting political, Summer 2019.'},
 		{photo: 'barry.jpg', desc: 'My life philosophy is based on Barry\'s views, Summer 2019.'},
-		{photo: 'panusopen.jpg', desc: 'Enjoying the game, Fall 2019.'},
 		{photo: 'nyc.jpg', desc: 'Great view from Weehawken, NJ, Fall 2019.'},
 		{photo: 'commute.jpg', desc: 'Best job ever.  I\'ll miss the commute, Weehawken, Fall 2019.'},
 		{photo: 'nola.jpg', desc: 'New Orleans right before Pandemic, La, Jan 2020.'},
