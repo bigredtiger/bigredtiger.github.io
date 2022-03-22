@@ -55,7 +55,7 @@
 				padding: 10px 20px;
 				cursor: pointer;
 				transform: rotate(90deg);
-				margin: 0 -20px 60px 0;
+				margin: 0 -20px 48px 0;
 			}
 			
 			.menuItem:first-child {
@@ -76,6 +76,7 @@
 				width: 464px;
 				height: 312px;
 				margin-bottom: 3px;
+				background-size: cover;
 			}
 			
 			#splashDesc {
@@ -160,7 +161,7 @@
 				text-align: right;
 				padding: 10px;
 				cursor: pointer;
-				margin-bottom: 10px;
+				margin-bottom: 6px;
 			}
 			
 			.controlButton:active {
@@ -179,7 +180,7 @@
 				text-align: right;
 				padding: 10px;
 				cursor: pointer;
-				margin-bottom: 10px;
+				margin-bottom: 6px;
 			}
 			
 			.playButton:active {
@@ -245,7 +246,7 @@
 		<footer>Copyright &copy; 2000 - <span id="currentYear"></span> BigRedTiger.com All rights reserved.</footer>
 		<script src="data.js"></script>
 		<script type="module">
-			import { el, rand, sleep, qry, qryAll, log, sortDesc, renderColorText } from './lib/lib.js';
+			import { el, rand, sleep, qry, qryAll, log, sortDesc, renderColorText } from '../lib/lib.js';
 
 			(function(data) {
 				let splashIdx;
