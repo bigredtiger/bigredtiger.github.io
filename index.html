@@ -405,7 +405,11 @@
 						const txt = e.target.innerText;
 
 						if (e.target.tagName === 'LI') {
-							location.href = `#!${txt}`;
+							if (location.hash && location.hash.includes(e.target.innerText)) {
+								app[txt]();
+							} else {
+								location.href = `#!${txt}`;
+							}
 						}
 					});
 					
