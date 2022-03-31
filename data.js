@@ -9,7 +9,8 @@ var DATA = {
 		{photo: 'splash7.jpg', desc: 'Denver'},
 		{photo: 'splash8.jpg', desc: 'Lake Placid'},
 		{photo: 'splash9.jpg', desc: 'Niagara Falls'},
-		{photo: 'splash10.jpg', desc: 'Lake Tahoe'}
+		{photo: 'splash10.jpg', desc: 'Lake Tahoe'},
+		{photo: 'splash11.jpg', desc: 'World Financial Center'}
 	],
 	quotes : [
 		{quote: 'Success is never permanent. Failure is never failure. The only thing that really counts is to never, never, never give up', auth: 'Sir Winston Churchill'},
@@ -116,6 +117,7 @@ var DATA = {
 		{quote: 'People would rather believe than know', auth: 'Edward O Wilson'},
 		{quote: 'How can you prove whether at this moment we are sleeping, and all our thoughts are a dream; or whether we are awake, and talking to one another in the waking state?', auth: 'Plato'},
 		{quote: 'I do not standby in the presence of evil!', auth: 'Alita'},
+		{quote: 'To avoid criticism, say nothing, do nothing, be nothing', auth: 'Aristotle'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
