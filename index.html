@@ -350,6 +350,12 @@
 							<p id="author">${data.quotes[quoteIdx].auth ? DATA.quotes[quoteIdx].auth : '' }</p>
 						</section>
 					`);
+
+					if (quoteIdx === 7) {
+						el('quoteText').style('fontSize', '1.2em');
+					} else {
+						el('quoteText').style('fontSize', '2em');
+					}
 				}
 
 				function renderPhoto() {
