@@ -24,6 +24,7 @@ var DATA = {
 		{photo: 'spl_rock.jpg', desc: 'Rockefeller Center'},
 		{photo: 'spl_slc.jpg', desc: 'Salt Lake City'},
 		{photo: 'spl_sugarloaf.jpg', desc: 'Sugarloaf Resort, Me'},
+		{photo: 'spl_swissrail.jpg', desc: 'Swiss Rail'},
 		{photo: 'spl_tahoe.jpg', desc: 'Lake Tahoe'},
 		{photo: 'spl_toronto.jpg', desc: 'Art Gallery of Ontario'},
 		{photo: 'spl_vail.jpg', desc: 'Vail Ski Resort'},
