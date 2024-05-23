@@ -137,6 +137,7 @@ var DATA = {
 		{quote: 'How can you prove whether at this moment we are sleeping, and all our thoughts are a dream; or whether we are awake, and talking to one another in the waking state?', auth: 'Plato'},
 		{quote: 'I do not standby in the presence of evil!', auth: 'Alita'},
 		{quote: 'To avoid criticism, say nothing, do nothing, be nothing', auth: 'Aristotle'},
+		{quote: 'Most elite athletes are those kind of people that don’t don’t listen to the noise', auth: 'Janet Evans'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
