@@ -273,7 +273,7 @@ var DATA = {
 		{photo: 'dom_distillery.jpg', desc: 'Fun times at Old Dom Distillery in Memphis, Spring 2024'},
 		{photo: 'sun_studios.jpg', desc: 'Iconic Sun Studios, Spring 2024.'},
 		{photo: 'bbking.jpg', desc: 'Fun night at BB King, Memphis, Spring 2024.'},
-		{photo: 'torien.jpg', desc: 'Fun times at Torien w/Chef Ikegawa and staff, KC, Early Summer 2024.'},
+		{photo: 'torien.jpg', desc: 'Fun times at Torien w/Chef Ikegawa and staff, Early Summer 2024.'},
 		{photo: 'limo.jpg', desc: 'Here\'s to you and the good life.'}
 	],
 	games: [
