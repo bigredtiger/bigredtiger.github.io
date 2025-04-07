@@ -138,6 +138,7 @@ var DATA = {
 		{quote: 'I do not standby in the presence of evil!', auth: 'Alita'},
 		{quote: 'To avoid criticism, say nothing, do nothing, be nothing', auth: 'Aristotle'},
 		{quote: 'Most elite athletes are those kind of people that don\'t listen to the noise', auth: 'Janet Evans'},
+		{quote: 'When I take things not so seriously, I can put my best foot forward.  I don\’t think anything is really that serious…It\’s just really nice to be here.', auth: 'Alysa Liu'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
 	photos: [
