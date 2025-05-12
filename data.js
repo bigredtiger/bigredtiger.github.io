@@ -140,6 +140,7 @@ var DATA = {
 		{quote: 'Most elite athletes are those kind of people that don\'t listen to the noise', auth: 'Janet Evans'},
 		{quote: 'When I take things not so seriously, I can put my best foot forward.  I don\’t think anything is really that serious…It\’s just really nice to be here.', auth: 'Alysa Liu'},
 		{quote: 'Sadness is a choice.  I like to keep everything in my life positive as possible.', auth: 'Akon'},
+		{quote: 'Life is about the pivot.  The people I find that are forever young and happy are those that understand and accept it.  The only thing constant is change.', auth: 'Elaine Goldsmith-Thomas'},
 		{quote: 'Absolutely…always…I intend on having fun forever', auth: 'Sandra Bernhard'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
