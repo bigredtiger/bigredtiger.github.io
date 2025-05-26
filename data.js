@@ -147,6 +147,7 @@ var DATA = {
 		{quote: 'In sports, you have to be dumb enough to always believe you have a chance.  You have to forget as it never happened and not dwell.  I will win no matter what.', auth: 'Maria Sharapova'},
 		{quote: 'I\’ve always been able to take the best, skip the rest.  It\’s my philosophy.', auth: 'Maria Sharapova'},
 		{quote: 'Hang on, be resilient, and have fun', auth: 'RNA Pioneers'},
+		{quote: 'John is a man of focus, commitment, sheer will...', auth: 'Viggo Tarasov'},
 		{quote: 'Absolutely…always…I intend on having fun forever', auth: 'Sandra Bernhard'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
