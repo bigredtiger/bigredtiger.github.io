@@ -141,6 +141,12 @@ var DATA = {
 		{quote: 'When I take things not so seriously, I can put my best foot forward.  I don\’t think anything is really that serious…It\’s just really nice to be here.', auth: 'Alysa Liu'},
 		{quote: 'Sadness is a choice.  I like to keep everything in my life positive as possible.', auth: 'Akon'},
 		{quote: 'Life is about the pivot.  The people I find that are forever young and happy are those that understand and accept it.  The only thing constant is change.', auth: 'Elaine Goldsmith-Thomas'},
+		{quote: 'To be great at anything, you have to be able to endure a tremendous amount of boredom.  You have to be tough.', auth: 'Yuri Yudkin'},
+		{quote: 'If you decide to do it, you can do it - end of story', auth: 'Yuri Sharapova'},
+		{quote: 'It was all about focus.  It was about how you locked in on that ball, stay focused on the task.  There was nothing but that ball and that shot and that game.', auth: 'Max Eisenbud'},
+		{quote: 'In sports, you have to be dumb enough to always believe you have a chance.  You have to forget as it never happened and not dwell.  I will win no matter what.', auth: 'Maria Sharapova'},
+		{quote: 'I\’ve always been able to take the best, skip the rest.  It\’s my philosophy.', auth: 'Maria Sharapova'},
+		{quote: 'Hang on, be resilient, and have fun', auth: 'RNA Pioneers'},
 		{quote: 'Absolutely…always…I intend on having fun forever', auth: 'Sandra Bernhard'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
