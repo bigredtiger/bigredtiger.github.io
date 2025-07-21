@@ -148,6 +148,7 @@ var DATA = {
 		{quote: 'I\’ve always been able to take the best, skip the rest.  It\’s my philosophy.', auth: 'Maria Sharapova'},
 		{quote: 'Hang on, be resilient, and have fun', auth: 'RNA Pioneers'},
 		{quote: 'John is a man of focus, commitment, sheer will...', auth: 'Viggo Tarasov'},
+		{quote: 'What is an ocean, but a multitude of drops?', auth: 'Adam Ewing'},
 		{quote: 'Absolutely…always…I intend on having fun forever', auth: 'Sandra Bernhard'},
 		{quote: 'It is my eternal goal to always improve myself and radiate peace wherever I go', auth: 'SW'}		
 	],
